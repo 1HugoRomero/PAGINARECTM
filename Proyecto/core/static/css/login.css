@@ -26,7 +26,7 @@
     display: flex;
     background: var(--acc-bg);
     color: var(--acc-ink);
-    font-family: Inter, "Segoe UI", sans-serif;
+    font-family: Outfit, Inter, "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
 }
 
