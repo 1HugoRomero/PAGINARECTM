@@ -22,10 +22,7 @@ User = get_user_model()
 PASSWORD = 'Clave-segura-123'
 CORE = Path(__file__).resolve().parent.parent
 TITLE = '¿Cómo deseas organizar tu predio?'
-INTRO = (
-    'Puedes utilizar toda la superficie como un solo potrero o dividirla en sectores para gestionar tus cultivos '
-    'y actividades agrícolas por separado.'
-)
+INTRO = 'Elige una opción para comenzar a gestionar la superficie de'
 
 
 def visible(response):
@@ -112,7 +109,8 @@ class SingleMessageAfterRegisteringTests(PredioNuevoBase):
         self.assertEqual(html.count('Dividir mi predio'), 1)
         self.assertEqual(html.count('Lo haré más tarde'), 1)
         self.assertIn('name="nombre"', html)
-        self.assertIn('value="Potrero principal"', html)
+        # El nombre va como sugerencia: si se envía vacío, la vista usa «Potrero principal».
+        self.assertIn('placeholder="Ej. Potrero principal"', html)
         self.assertIn(f'action="/predios/{farm.pk}/usar-completo/"', html)
         self.assertIn(f'href="/predios/{farm.pk}/potreros/nuevo/"', html)
         # Sin explicaciones repetidas de qué es un predio o un potrero.

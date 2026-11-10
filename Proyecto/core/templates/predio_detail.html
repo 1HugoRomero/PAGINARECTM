@@ -2,31 +2,28 @@
 {% load static agro_assets %}
 {% block title %}{{ predio.nombre }} · AgroAsesor{% endblock %}
 {% block extra_css %}
+    <link href="{% vendor 'fonts/outfit.css' 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/predios.css' %}?v=35">
+    <link rel="stylesheet" href="{% static 'css/predio-ficha.css' %}?v=1">
 {% endblock %}
 {% block content %}
     <nav class="crumbs" aria-label="Dónde estás"><a href="{% url 'predios' %}">Mis predios</a><span aria-hidden="true">›</span>{% if selected_potrero %}<a href="{% url 'predio_detail' predio.pk %}">{{ predio.nombre }}</a><span aria-hidden="true">›</span><span class="is-current" aria-current="page">{{ selected_potrero.nombre }}</span>{% else %}<span class="is-current" aria-current="page">{{ predio.nombre }}</span>{% endif %}</nav>
-    <div class="terrain-page-heading">
-        <div>
-            <span class="terrain-eyebrow"><i data-lucide="map"></i> Ficha del predio</span>
-            <h1 class="page-title">{{ predio.nombre }}</h1>
-            <p class="page-sub">{{ predio.ubicacion|default:'Ubicación de referencia no registrada' }}</p>
-            <div class="meta-row detail-summary-row">
-                <span class="meta-item"><i data-lucide="ruler"></i>{{ predio.superficie_ha|floatformat:"-2" }} ha</span>
-                <span class="meta-item"><i data-lucide="layout-grid"></i>{{ farm_card.ui.plot_count }} potrero{{ farm_card.ui.plot_count|pluralize }}</span>
-                {% if farm_card.ui.crop_count %}<span class="meta-item"><i data-lucide="sprout"></i>{{ farm_card.ui.crop_count }} cultivo{{ farm_card.ui.crop_count|pluralize }}</span>{% endif %}
-                {% if farm_card.ui.pending %}<span class="meta-item"><i data-lucide="clipboard-check"></i>{{ farm_card.ui.pending }} labor{{ farm_card.ui.pending|pluralize:"es" }} pendiente{{ farm_card.ui.pending|pluralize }}</span>{% endif %}
+    <div class="pf">
+    <header class="card pf-head">
+        <div class="pf-head-main">
+            <div class="pf-head-id">
+                <div class="chip-row detail-chips">
+                    {% if not farm_card.ui.plot_count %}<span class="state-chip is-pending">Sin potreros</span>
+                    {% elif farm_card.ui.crop_count %}<span class="state-chip is-green">Con cultivo</span>
+                    {% else %}<span class="state-chip is-neutral">Sin cultivo</span>{% endif %}
+                    {% if farm_card.ui.all_planned %}<span class="state-chip is-dark">Planificación completa</span>{% endif %}
+                    {% if farm_card.ui.overdue %}<span class="state-chip is-red">Labores vencidas · {{ farm_card.ui.overdue }}</span>
+                    {% elif farm_card.ui.pending %}<span class="state-chip is-amber">Labores pendientes · {{ farm_card.ui.pending }}</span>{% endif %}
+                </div>
+                <h1 class="page-title pf-title">{{ predio.nombre }}</h1>
+                <p class="pf-location"><i data-lucide="map-pin"></i><span>{{ predio.ubicacion|default:'Ubicación de referencia no registrada' }}</span></p>
             </div>
-            <div class="chip-row detail-chips">
-            {% if not farm_card.ui.plot_count %}<span class="state-chip is-neutral">Sin potreros</span>
-{% elif farm_card.ui.crop_count %}<span class="state-chip is-green">Con cultivo</span>
-{% else %}<span class="state-chip is-neutral">Sin cultivo</span>{% endif %}
-{% if farm_card.ui.all_planned %}<span class="state-chip is-dark">Planificación completa</span>{% endif %}
-{% if farm_card.ui.overdue %}<span class="state-chip is-red">Labores vencidas · {{ farm_card.ui.overdue }}</span>
-{% elif farm_card.ui.pending %}<span class="state-chip is-amber">Labores pendientes · {{ farm_card.ui.pending }}</span>{% endif %}
-</div>
-</div>
-<div class="detail-head-actions">
+            <div class="detail-head-actions">
     <a class="btn-secondary-agro"
        href="{% url 'predio_edit' predio.pk %}"><i data-lucide="pencil"></i> Editar predio</a>
     {% if potreros %}<a class="btn-secondary-agro"
@@ -54,75 +51,130 @@
         </div>
     </div>
 </div>
-</div>
+        </div>
+        <div class="pf-stats detail-summary-row">
+            <div class="pf-stat">
+                <span class="pf-stat-ico" aria-hidden="true"><i data-lucide="crop"></i></span>
+                <span class="pf-stat-text"><small>Superficie total</small><strong>{{ predio.superficie_ha|cifra }} ha</strong></span>
+            </div>
+            <div class="pf-stat">
+                <span class="pf-stat-ico" aria-hidden="true"><i data-lucide="layers"></i></span>
+                <span class="pf-stat-text"><small>Potreros</small><strong>{{ farm_card.ui.plot_count }}</strong></span>
+            </div>
+            {% if farm_card.ui.crop_count %}
+                <div class="pf-stat">
+                    <span class="pf-stat-ico" aria-hidden="true"><i data-lucide="sprout"></i></span>
+                    <span class="pf-stat-text"><small>Cultivos</small><strong>{{ farm_card.ui.crop_count }}</strong></span>
+                </div>
+            {% endif %}
+            {% if farm_card.ui.pending %}
+                <div class="pf-stat">
+                    <span class="pf-stat-ico" aria-hidden="true"><i data-lucide="clipboard-check"></i></span>
+                    <span class="pf-stat-text"><small>Labores pendientes</small><strong>{{ farm_card.ui.pending }}</strong></span>
+                </div>
+            {% endif %}
+            <div class="pf-usage">
+                <div class="pf-usage-top"><span>Superficie utilizada</span><strong>{% widthratio superficie_utilizada predio.superficie_ha 100 %}%</strong></div>
+                <div class="pf-usage-bar" role="img" aria-label="{% widthratio superficie_utilizada predio.superficie_ha 100 %}% de la superficie utilizada"><span style="width: {% widthratio superficie_utilizada predio.superficie_ha 100 %}%"></span></div>
+                <small>{{ superficie_restante|cifra }} ha disponibles</small>
+            </div>
+        </div>
+    </header>
 {% if needs_setup %}
     <section class="card use-card" aria-labelledby="use-title">
         <div class="use-copy">
+            <span class="pf-kicker">Siguiente paso</span>
             <h2 class="use-title" id="use-title">¿Cómo deseas organizar tu predio?</h2>
-            <p>Puedes utilizar toda la superficie como un solo potrero o dividirla en sectores para gestionar tus cultivos y actividades agrícolas por separado.</p>
-            <a class="use-later" href="{% url 'predios' %}">Lo haré más tarde</a>
+            <p>Elige una opción para comenzar a gestionar la superficie de {{ predio.nombre }}.</p>
         </div>
         <div class="use-options">
             {% if can_use_whole %}
-                <article class="use-option">
-                    <h3><i data-lucide="sprout"></i> Un solo potrero</h3>
-                    <p>Usa toda la superficie registrada ({{ predio.superficie_ha|floatformat:"-2" }} ha).</p>
+                <article class="use-option is-featured">
+                    <div class="use-option-head">
+                        <span class="use-ico" aria-hidden="true"><i data-lucide="warehouse"></i></span>
+                        <div>
+                            <h3>Un solo potrero <span class="use-tag">Rápido</span></h3>
+                            <p>Usa las {{ predio.superficie_ha|cifra }} ha como una única unidad productiva.</p>
+                        </div>
+                    </div>
                     <form class="use-form" method="post" action="{% url 'predio_usar_completo' predio.pk %}">
                         {% csrf_token %}
                         <label class="field use-field" for="use-whole-name">
                             <span>Nombre del potrero</span>
-                            <input id="use-whole-name" name="nombre" value="Potrero principal" maxlength="150" autocomplete="off">
+                            <input id="use-whole-name" name="nombre" placeholder="Ej. Potrero principal" maxlength="150" autocomplete="off">
                         </label>
-                        <button class="btn-primary-agro" type="submit"><i data-lucide="check"></i> Utilizar todo el predio</button>
+                        <button class="btn-primary-agro" type="submit">Utilizar todo el predio</button>
                     </form>
                 </article>
             {% endif %}
             <article class="use-option">
-                <h3><i data-lucide="map"></i> Dividir en potreros</h3>
-                <p>Define distintos sectores dentro del predio.</p>
+                <div class="use-option-head">
+                    <span class="use-ico is-plain" aria-hidden="true"><i data-lucide="layers"></i></span>
+                    <div>
+                        <h3>Dividir en potreros</h3>
+                        <p>Dibuja divisiones para gestionar diferentes cultivos o sectores.</p>
+                    </div>
+                </div>
                 <a class="{% if can_use_whole %}btn-secondary-agro{% else %}btn-primary-agro{% endif %}"
-                   href="{% url 'potrero_create' predio.pk %}"><i data-lucide="split"></i> Dividir mi predio</a>
+                   href="{% url 'potrero_create' predio.pk %}">Dividir mi predio <i data-lucide="arrow-right"></i></a>
             </article>
         </div>
+        <a class="use-later" href="{% url 'predios' %}">Lo haré más tarde</a>
     </section>
 {% endif %}
 <div class="predio-detail-layout">
-    <section class="card detail-map-card">
-        <div class="map-card-heading">
-            <div>
-                <span class="terrain-card-kicker">PERÍMETRO REGISTRADO</span>
-                <h2>Vista geográfica</h2>
-            </div>
-            {% if predio.geojson %}
-                <div class="detail-map-tools">
-                    <div class="map-view-switch"
-                         role="group"
-                         aria-label="Cambiar vista del mapa">
-                        <button type="button"
-                                class="is-active"
-                                data-map-layer="normal"
-                                aria-pressed="true">Normal</button>
-                        <button type="button" data-map-layer="satellite" aria-pressed="false">Satélite</button>
-                    </div>
-                    <span class="map-badge">GeoJSON guardado</span>
-                </div>
-            {% endif %}
+    <div class="pf-geo-head">
+        <div>
+            <span class="pf-kicker">Vista geográfica</span>
+            <h2>Ubicación y límites</h2>
+            <p>Representación cartográfica del terreno registrado.</p>
         </div>
+        {% if predio.geojson %}
+            <div class="detail-map-tools">
+                <div class="map-view-switch"
+                     role="group"
+                     aria-label="Cambiar vista del mapa">
+                    <button type="button"
+                            class="is-active"
+                            data-map-layer="normal"
+                            aria-pressed="true">Normal</button>
+                    <button type="button" data-map-layer="satellite" aria-pressed="false">Satélite</button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <section class="detail-map-card" aria-label="Mapa del predio">
         {% if predio.geojson %}
             <p id="predio-map-status"
                class="detail-map-status"
                role="status"
                aria-live="polite"></p>
-            <div id="predio-detail-map"
-                 class="farm-map"
-                 aria-label="Mapa del perímetro del predio"></div>
-            <details class="vertex-details">
-                <summary>Coordenadas de vértices</summary>
-                <ol id="predio-vertices" class="vertex-list">
-                </ol>
-            </details>
+            <div class="pf-map-frame">
+                <div id="predio-detail-map"
+                     class="farm-map"
+                     aria-label="Mapa del perímetro del predio"></div>
+                <span class="pf-zoom" id="predio-map-zoom" hidden></span>
+            </div>
+            <div class="pf-geo-bar">
+                <p class="pf-geo-status"><i class="pf-dot is-ok" aria-hidden="true"></i><strong>Estado GeoJSON:</strong> <span>GeoJSON guardado</span></p>
+                <details class="vertex-details">
+                    <summary>Coordenadas de los vértices <i data-lucide="chevron-down"></i></summary>
+                    <ol id="predio-vertices" class="vertex-list">
+                    </ol>
+                </details>
+            </div>
         {% else %}
-            <div class="detail-empty-state"><i data-lucide="map-off"></i><p>Este predio se registró antes de habilitar los perímetros. Edita el predio para delimitarlo y guardar su geometría.</p><a class="btn-secondary-agro" href="{% url 'predio_edit' predio.pk %}">Agregar perímetro</a></div>
+            <div class="pf-map-frame is-empty">
+                <div class="detail-empty-state pf-map-empty">
+                    <span class="pf-empty-ico" aria-hidden="true"><i data-lucide="map"></i></span>
+                    <strong>Geometría no disponible</strong>
+                    <p>Este predio se registró antes de habilitar los perímetros. Edita el predio para delimitarlo y guardar su geometría.</p>
+                    <a class="btn-secondary-agro" href="{% url 'predio_edit' predio.pk %}">Agregar perímetro</a>
+                </div>
+            </div>
+            <div class="pf-geo-bar">
+                <p class="pf-geo-status"><i class="pf-dot" aria-hidden="true"></i><strong>Estado GeoJSON:</strong> <span>Sin geometría guardada</span></p>
+            </div>
         {% endif %}
     </section>
     <section class="card detail-summary-card">
@@ -144,57 +196,22 @@
                  class="detail-tab-panel"
                  role="tabpanel"
                  aria-labelledby="tab-information">
-            <h2>Información general</h2>
+            <h2 class="sr-only">Información general</h2>
             <dl class="detail-facts">
-                <div>
-                    <dt>Superficie</dt>
-                    <dd>
-                        {{ predio.superficie_ha|cifra }} ha
-                    </dd>
-                </div>
+                <div><dt>Superficie</dt><dd>{{ predio.superficie_ha|cifra }} ha</dd></div>
                 <div><dt>Perímetro</dt><dd>{% if predio.perimetro_m is not None %}{{ predio.perimetro_m|floatformat:2 }} m{% else %}—{% endif %}</dd></div>
-                <div>
-                    <dt>Registro</dt>
-                    <dd>
-                        {{ predio.creado|date:"d/m/Y H:i" }}
-                    </dd>
-                </div>
-                <div>
-                    <dt>Última modificación</dt>
-                    <dd>
-                        {{ predio.actualizado|date:"d/m/Y H:i" }}
-                    </dd>
-                </div>
+                <div><dt>Fecha de registro</dt><dd>{{ predio.creado|date:"d/m/Y H:i" }}</dd></div>
+                <div><dt>Última modificación</dt><dd>{{ predio.actualizado|date:"d/m/Y H:i" }}</dd></div>
             </dl>
-            {% if predio.descripcion %}<h3>Descripción</h3><p>{{ predio.descripcion }}</p>{% endif %}
-            {% if predio.observaciones %}<h3>Observaciones</h3><p>{{ predio.observaciones }}</p>{% endif %}
-            <h2>Gestión agrícola</h2>
+            <h2 class="sr-only">Gestión agrícola</h2>
             <dl class="detail-facts">
-                <div>
-                    <dt>Número de potreros</dt>
-                    <dd>
-                        {{ potreros|length }}
-                    </dd>
-                </div>
-                <div>
-                    <dt>Superficie utilizada</dt>
-                    <dd>
-                        {{ superficie_utilizada|cifra }} ha
-                    </dd>
-                </div>
-                <div>
-                    <dt>Superficie restante</dt>
-                    <dd>
-                        {{ superficie_restante|cifra }} ha
-                    </dd>
-                </div>
-                <div>
-                    <dt>Cultivos registrados</dt>
-                    <dd>
-                        {{ cultivos|length }}
-                    </dd>
-                </div>
+                <div><dt>Número de potreros</dt><dd>{{ potreros|length }}</dd></div>
+                <div><dt>Superficie utilizada</dt><dd>{{ superficie_utilizada|cifra }} ha</dd></div>
+                <div><dt>Superficie restante</dt><dd>{{ superficie_restante|cifra }} ha</dd></div>
+                <div><dt>Cultivos registrados</dt><dd>{{ cultivos|length }}</dd></div>
             </dl>
+            {% if predio.descripcion %}<h3>Descripción</h3><p class="pf-note">{{ predio.descripcion }}</p>{% endif %}
+            {% if predio.observaciones %}<h3>Observaciones</h3><p class="pf-note">{{ predio.observaciones }}</p>{% endif %}
             {% if next_step %}
                 <aside class="next-step-line" aria-labelledby="next-step-title">
                     <span class="next-hint-label" id="next-step-title">Siguiente paso</span>
@@ -270,9 +287,12 @@
             {% endwith %}
         {% endfor %}
         {% if not farm_card.plots %}
-            <div class="detail-empty-state"><p>Aún no hay potreros asociados a este predio.</p></div>
-        {% endif %}
-        {% if not cultivos %}<p class="muted">Todavía no hay cultivos registrados en sus potreros.</p>{% endif %}
+            <div class="detail-empty-state pf-plots-empty">
+                <span class="pf-empty-ico is-plain" aria-hidden="true"><i data-lucide="layers"></i></span>
+                <strong>Aún no hay potreros</strong>
+                <p>Organiza el predio para comenzar a gestionar sus sectores.</p>
+            </div>
+        {% elif not cultivos %}<p class="muted pf-foot-note">Todavía no hay cultivos registrados en sus potreros.</p>{% endif %}
     </section>
     <section id="predio-history"
              class="detail-tab-panel history-panel"
@@ -307,9 +327,10 @@
     </section>
 </section>
 </div>
+</div>
 {% if predio.geojson %}
     {{ maps_config|json_script:'maps-config' }}
     {{ predio.geojson|json_script:'predio-detail-geometry' }}
 {% endif %}
 {% endblock %}
-{% block extra_js %}<script>document.addEventListener('click',function(e){var b=e.target.closest('[data-open-history]');if(!b)return;var t=document.getElementById('tab-history');if(t){t.click();var p=document.getElementById('predio-history');if(p&&p.scrollIntoView)p.scrollIntoView({behavior:'smooth',block:'start'});}});</script>{% if predio.geojson %}{{ maps_config|json_script:'maps-config' }}<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="{% static 'js/predio-detail.js' %}?v=2"></script>{% endif %}{% endblock %}
+{% block extra_js %}<script>document.addEventListener('click',function(e){var b=e.target.closest('[data-open-history]');if(!b)return;var t=document.getElementById('tab-history');if(t){t.click();var p=document.getElementById('predio-history');if(p&&p.scrollIntoView)p.scrollIntoView({behavior:'smooth',block:'start'});}});</script>{% if predio.geojson %}<script src="{% vendor 'leaflet/leaflet.js' 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js' %}"></script>{% endif %}<script src="{% static 'js/predio-detail.js' %}?v=3"></script>{% endblock %}
