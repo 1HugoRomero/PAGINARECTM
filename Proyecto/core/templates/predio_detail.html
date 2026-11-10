@@ -4,7 +4,7 @@
 {% block extra_css %}
     <link href="{% vendor 'fonts/outfit.css' 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/predios.css' %}?v=35">
-    <link rel="stylesheet" href="{% static 'css/predio-ficha.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/predio-ficha.css' %}?v=2">
 {% endblock %}
 {% block content %}
     <nav class="crumbs" aria-label="Dónde estás"><a href="{% url 'predios' %}">Mis predios</a><span aria-hidden="true">›</span>{% if selected_potrero %}<a href="{% url 'predio_detail' predio.pk %}">{{ predio.nombre }}</a><span aria-hidden="true">›</span><span class="is-current" aria-current="page">{{ selected_potrero.nombre }}</span>{% else %}<span class="is-current" aria-current="page">{{ predio.nombre }}</span>{% endif %}</nav>

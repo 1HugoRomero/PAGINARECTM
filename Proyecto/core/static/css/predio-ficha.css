@@ -1022,3 +1022,166 @@
         padding: 10px 18px 20px;
     }
 }
+
+/* ── Navegación lateral y cabecera como en el prototipo (solo mientras se ve la ficha) ──
+   «.app-body:has(.pf)» limita estas reglas a predio_detail.html: las demás pantallas conservan su menú. */
+.app-body:has(.pf) {
+    background: #f6f8f7;
+    font-family: Outfit, "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.app-body:has(.pf) .sidebar {
+    padding: 22px 16px;
+    border-right: 1px solid #e6eaee;
+    background: #fff;
+}
+
+.app-body:has(.pf) .brand {
+    gap: 12px;
+    padding: 6px 8px 26px;
+    color: #0f1b2d;
+}
+
+.app-body:has(.pf) .brand strong {
+    color: #0b6b4b;
+    font-size: 1.28rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.app-body:has(.pf) .brand small {
+    max-width: 150px;
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: .62rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.app-body:has(.pf) .logo {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: #0b7a53;
+    color: #fff;
+}
+
+.app-body:has(.pf) .logo svg {
+    width: 24px;
+    height: 24px;
+}
+
+.app-body:has(.pf) .sidebar-primary-nav {
+    gap: 4px;
+}
+
+.app-body:has(.pf) .sidebar .nav-link,
+.app-body:has(.pf) .sidebar .nav-sublink {
+    gap: 14px;
+    min-height: 48px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 14px;
+    color: #475569;
+    font-size: .98rem;
+    font-weight: 400;
+}
+
+.app-body:has(.pf) .sidebar .nav-link svg,
+.app-body:has(.pf) .sidebar .nav-sublink svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    stroke-width: 1.6;
+}
+
+.app-body:has(.pf) .sidebar .nav-link:hover,
+.app-body:has(.pf) .sidebar .nav-sublink:hover,
+.app-body:has(.pf) .sidebar .nav-link:focus-visible,
+.app-body:has(.pf) .sidebar .nav-sublink:focus-visible {
+    background: #f1f5f9;
+    color: #0f1b2d;
+}
+
+.app-body:has(.pf) .sidebar .nav-link:focus-visible,
+.app-body:has(.pf) .sidebar .nav-sublink:focus-visible {
+    outline: 2px solid #0b6b4b;
+    outline-offset: -2px;
+}
+
+.app-body:has(.pf) .sidebar .nav-link.is-active,
+.app-body:has(.pf) .sidebar .nav-sublink.is-active {
+    background: #e6f7ef;
+    color: #0b6b4b;
+    font-weight: 500;
+}
+
+/* Punto verde del ítem activo (los grupos desplegables ya llevan su flecha). */
+.app-body:has(.pf) .sidebar a.nav-link.is-active::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: #0b9a66;
+}
+
+.app-body:has(.pf) .nav-sub {
+    border-left-color: #e6eaee;
+}
+
+.app-body:has(.pf) .topbar {
+    padding: 14px 36px;
+    box-shadow: 0 1px 0 #e6eaee;
+}
+
+.app-body:has(.pf) .topbar .global-search {
+    max-width: 520px;
+    border-color: #e6eaee;
+    background: #f8fafc;
+}
+
+.app-body:has(.pf) .topbar .icon-button {
+    border-color: transparent;
+    color: #475569;
+}
+
+.app-body:has(.pf) .topbar .icon-button:hover {
+    background: #f1f5f9;
+}
+
+.app-body:has(.pf) .topbar .note-dot {
+    background: #0b9a66;
+}
+
+.app-body:has(.pf) .topbar .avatar {
+    background: #0f1b2d;
+}
+
+.app-body:has(.pf) .topbar .profile {
+    border-color: transparent;
+    color: #0f1b2d;
+}
+
+.app-body:has(.pf) .crumbs {
+    margin-bottom: 14px;
+    color: #94a3b8;
+    font-size: .9rem;
+}
+
+.app-body:has(.pf) .crumbs a {
+    color: #94a3b8;
+}
+
+.app-body:has(.pf) .crumbs .is-current {
+    color: #0f1b2d;
+    font-weight: 500;
+}
+
+@media (max-width: 640px) {
+    .app-body:has(.pf) .topbar {
+        padding: 10px 14px;
+    }
+}
