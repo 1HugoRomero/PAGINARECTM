@@ -36,6 +36,15 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+CSRF_TRUSTED_ORIGINS = [o for o in os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+
+# GitHub Codespaces: la página se abre por una dirección https://<nombre>-8000.app.github.dev
+# (no por localhost), así que hay que aceptar ese dominio y su origen para los formularios.
+if os.getenv('CODESPACES') == 'true':
+    ALLOWED_HOSTS += ['.app.github.dev']
+    CSRF_TRUSTED_ORIGINS += ['https://*.app.github.dev']
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 MAP_TILE_URL = os.getenv(
     'MAP_TILE_URL',
     'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
