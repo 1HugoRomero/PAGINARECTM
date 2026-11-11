@@ -24,6 +24,10 @@ services:
       EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-AgroAsesor <noreply@localhost>}
+      # Inicio de sesión con Google (opcional): se leen del .env, nunca se escriben aquí.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
     volumes:
       - agroasesor_data:/data   # LA base de datos oficial (SQLite persistente)
       - ./backups:/backups      # respaldos automáticos (visibles en tu PC)

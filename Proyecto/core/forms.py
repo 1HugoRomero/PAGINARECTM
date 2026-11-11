@@ -151,13 +151,56 @@ class RegistroForm(DatosAgricultorMixin, UserCreationForm):
         user.is_superuser = False
         if commit:
             user.save()
-            Agricultor.objects.create(
-                user=user,
-                nombre=self.cleaned_data['nombre_completo'],
-                rut=self.cleaned_data.get('rut') or None,
-                telefono=self.cleaned_data['telefono'],
-                comuna=self.cleaned_data['comuna'],
-            )
+            crear_ficha_agricultor(user, self.cleaned_data)
+        return user
+
+
+def crear_ficha_agricultor(user, datos):
+    """Ficha de agricultor de una cuenta nueva (registro normal o con Google)."""
+    return Agricultor.objects.create(
+        user=user,
+        nombre=datos['nombre_completo'],
+        rut=datos.get('rut') or None,
+        telefono=datos['telefono'],
+        comuna=datos['comuna'],
+    )
+
+
+class RegistroGoogleForm(DatosAgricultorMixin):
+    """Completa el registro de quien entró con Google: los mismos datos obligatorios del agricultor.
+
+    El correo ya lo verificó Google y no se pide contraseña (la cuenta entra con Google; si después quiere una
+    contraseña puede crearla desde «¿Olvidaste tu contraseña?»).
+    """
+
+    acepta_politicas = RegistroForm.base_fields['acepta_politicas']
+
+    field_order = ['nombre_completo', 'rut', 'telefono', 'comuna', 'acepta_politicas']
+
+    def __init__(self, *args, correo, **kwargs):
+        self.correo = correo.strip().lower()
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        datos = super().clean()
+        users = get_user_model().objects
+        if users.filter(email__iexact=self.correo).exists() or users.filter(username__iexact=self.correo).exists():
+            raise ValidationError('Este correo electrónico ya está registrado. Inicia sesión con tu cuenta.')
+        return datos
+
+    def save(self):
+        """Crea la cuenta (sin contraseña utilizable) y su ficha; el llamador la envuelve en una transacción."""
+        user = get_user_model()(
+            username=_nombre_de_usuario_desde_correo(self.correo),
+            email=self.correo,
+            is_staff=False,
+            is_superuser=False,
+        )
+        user.first_name, user.last_name = partir_nombre(self.cleaned_data['nombre_completo'])
+        user.set_unusable_password()
+        user.full_clean(exclude=['password'])
+        user.save()
+        crear_ficha_agricultor(user, self.cleaned_data)
         return user
 
 

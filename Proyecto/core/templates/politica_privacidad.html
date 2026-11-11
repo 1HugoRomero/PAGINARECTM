@@ -1,11 +1,10 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Privacidad, seguridad y cookies · AgroAsesor</title>
-        <link rel="stylesheet" href="{% static 'css/login.css' %}?v=5">
+        {% include "partials/access_head.html" %}
     </head>
     <body class="access-body">
         <main class="access-shell recovery-shell">

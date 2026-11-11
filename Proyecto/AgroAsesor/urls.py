@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from core import views
+from core import google_auth, views
 from core.api_gateway import api_v1
 
 urlpatterns = [
@@ -14,6 +14,9 @@ urlpatterns = [
         name="politica_privacidad",
     ),
     path("logout/", views.logout_view, name="logout"),
+    path("cuenta/google/", google_auth.google_iniciar, name="google_iniciar"),
+    path("cuenta/google/retorno/", google_auth.google_callback, name="google_callback"),
+    path("cuenta/google/completar/", google_auth.google_completar, name="google_completar"),
     path("cuenta/perfil/", views.perfil, name="perfil"),
     path("entrar-admin/", views.enter_as_admin, name="enter_as_admin"),
     path("", views.dashboard, name="dashboard"),
