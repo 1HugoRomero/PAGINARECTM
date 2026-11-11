@@ -20,32 +20,47 @@ Navegador ──sesión Django──▶ Django /api/v1/… ──HTTP interno + 
 
 ## Endpoints
 
-Funcionan:
+Estado real al 11-11-2026 (la columna `x-estado` de `openapi.yaml` dice lo mismo para cada operación).
+**La API no está completa:** 27 operaciones funcionan y 29 siguen respondiendo 501.
 
-- `GET /api/v1/health` y `GET /api/v1/openapi.json`
-- `GET /api/v1/usuarios/me`, `/predios`, `/predios/{id}`, `/predios/{id}/potreros`, `/potreros/{id}` y `/calculos`
-- `GET /api/v1/cultivos`, `/cultivos/{id}`, `/insumos`, `/insumos/{id}` y `/zonas`
-- Catálogo: `GET /api/v1/catalogo/categorias`, `/catalogo/fuentes`, `/catalogo/productos`,
-  `/catalogo/productos/{id}`, `/catalogo/referencias-siembra` y `POST /api/v1/catalogo/calcular-sacos`
-- Página de prueba del catálogo: `GET /catalogo`
-- **Fertilizantes** (públicos, sin sesión):
-  - `GET /api/v1/catalogo/fertilizantes` (filtros `nutriente`, `grupo`, `q`), `/catalogo/fertilizantes/{id}` y
-    `/catalogo/fertilizantes/resumen`: 19 fertilizantes con su composición en % de N, P2O5, K2O, Mg y S, el cuadro
-    y la página de la fuente y si el valor fue cotejado.
-  - `POST /api/v1/catalogo/calcular-fertilizante`: kilos de producto para cubrir el requerimiento de nutriente que
-    indica el usuario (no recomienda dosis). Si la fuente da un rango, pide la ley que declara la etiqueta.
-  - `GET /api/v1/catalogo/conversiones` y `/catalogo/convertir?de=P2O5&a=P&valor=46`: factores P2O5↔P y K2O↔K.
-  - `GET /api/v1/catalogo/normativa/contenidos-minimos` y `POST /api/v1/catalogo/revisar-etiqueta`: contenidos
-    mínimos de nutrientes de la Resolución SAG N° 8.651 exenta de 2024.
-- Consola para probar la API y ver las respuestas: `GET /consola` (la raíz `/` redirige ahí)
+### Funcionan (27)
 
-Fuentes de los fertilizantes (`data/fertilizantes.yaml`): FAO/IFA, *Los fertilizantes y su uso*, 4.ª ed., 2002
-(Cuadros 2 y 3, pp. 38-39; Anexo de conversiones, p. 77) y Resolución SAG N° 8.651 exenta, Diario Oficial del
-18-12-2024 (numeral 3.1.2, Grupo 2). Revisadas el 11-11-2026.
+- Sistema: `GET /health`, `GET /openapi.json`.
+- Datos del agricultor (requieren sesión de Django; cada uno ve solo lo suyo): `GET /usuarios/me`, `/predios`,
+  `/predios/{id}`, `/predios/{id}/potreros`, `/potreros/{id}`, `/calculos`.
+- Referencias de la base (requieren sesión): `GET /cultivos`, `/cultivos/{id}`, `/insumos`, `/insumos/{id}`, `/zonas`.
+- Catálogo agrícola (público): `GET /catalogo/categorias`, `/catalogo/fuentes`, `/catalogo/productos`,
+  `/catalogo/productos/{id}`, `/catalogo/referencias-siembra`, `POST /catalogo/calcular-sacos`.
+- Fertilizantes (público): `GET /catalogo/fertilizantes` (filtros `nutriente`, `grupo`, `q`),
+  `/catalogo/fertilizantes/{id}`, `/catalogo/fertilizantes/resumen`, `POST /catalogo/calcular-fertilizante`,
+  `GET /catalogo/conversiones`, `/catalogo/convertir`, `/catalogo/normativa/contenidos-minimos`,
+  `POST /catalogo/revisar-etiqueta`.
+- Páginas de prueba (fuera de `/api/v1`): `/consola` (probar endpoints) y `/catalogo`.
 
-El resto de las rutas de `openapi.yaml` (registro y login, escrituras, actividades, temporadas, calendario,
-predicciones, reportes, administración y cálculos de semillas, fertilizantes y cobertura) responde **501**:
-están definidas pero todavía no tienen lógica.
+### Pendientes: responden 501 (29)
+
+- Cuentas: `POST /auth/registro`, `/auth/login`, `/auth/logout`, `PATCH /usuarios/me` (las cuentas siguen en Django).
+- Escrituras de terreno: `POST /predios`, `PATCH|DELETE /predios/{id}`, `POST /predios/{id}/potreros`,
+  `PATCH|DELETE /potreros/{id}`, `POST /potreros/{id}/confirmar-perimetro`.
+- Temporadas (5), actividades (5), `GET /calendario`, `GET /reportes/resumen`,
+  `GET /reportes/predios/{id}/historial`, `GET /admin/resumen`, `POST /predicciones/rendimiento`,
+  `POST /calculos/semillas`, `/calculos/fertilizantes`, `/calculos/cobertura`.
+
+Todas las rutas pendientes (salvo `/auth/*`) exigen la sesión de Django antes de responder 501.
+
+### Fertilizantes: qué significa cada dato
+
+- `composicion_referencial`: N, P2O5, K2O, MgO y S por separado. `informado_en_fuente: false` = la fuente imprime
+  «-» (no es 0). MgO se calcula desde el Mg que informa FAO/IFA (× 1,6583) y lo indica en `origen: calculado`.
+- `grado.texto` escribe los rangos con guion largo («N 0 · P2O5 16–20 · K2O 0») para no confundirlos.
+- `calcular-fertilizante`: `producto_kg_ha = requerimiento × 100 / ley`. Si no se envía `ley_declarada_pct`, usa
+  la composición referencial (`ley.tipo = referencial`) y, si es un rango, entrega mínimo y máximo.
+- `revisar-etiqueta`: revisa solo los contenidos mínimos (y el biuret si se informa) de la categoría elegida;
+  `cumple_contenidos_minimos` NO significa cumplimiento de toda la Resolución 8.651.
+
+Fuentes (`data/fertilizantes.yaml`): FAO/IFA, *Los fertilizantes y su uso*, 4.ª ed., 2002 (Cuadros 2 y 3,
+pp. 38-39; texto p. 39 y 45; Anexo p. 77) y Resolución SAG N° 8.651 exenta, Diario Oficial del 18-12-2024.
+Los límites numéricos de sus Cuadros N° 1 a 11 no estaban en la versión de texto consultada y no se transcriben.
 
 ## Estructura
 
@@ -70,7 +85,7 @@ No contiene precios, stock ni formatos comerciales, y no afirma ningún aval de 
 ```powershell
 cd backend_flask
 py -3 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe run.py
 ```
@@ -84,7 +99,11 @@ Con Docker se levanta junto a Django (ver el README de `Proyecto/`):
 docker compose -f docker-compose.yml -f docker-compose.api.yml up -d --build
 ```
 
-Las pruebas de integración de Django con la API están en `core/tests/test_api.py`.
+Las pruebas de integración de Django con la API están en `core/tests/test_api.py`. GitHub Actions
+(`.github/workflows/pruebas.yml`) ejecuta pytest de la API y las pruebas de Django en cada push.
+
+Si cambias un endpoint, regenera los ejemplos de la documentación con `python scripts/completar_openapi.py`
+(llama a la API con una base de prueba y copia las respuestas reales).
 
 ## Probar la API en GitHub Codespaces
 
