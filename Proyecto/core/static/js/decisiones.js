@@ -257,6 +257,11 @@
     value.append(el('strong', '', spec.value), el('span', '', spec.unit));
     panel.append(value);
     if (spec.bar !== undefined) {
+      if (spec.barLabel) {
+        const caption = el('p', 'cover-bar-caption');
+        caption.append(el('span', '', spec.barLabel[0]), el('strong', '', spec.barLabel[1]));
+        panel.append(caption);
+      }
       const track = el('div', 'cover-bar');
       track.setAttribute('role', 'progressbar');
       track.setAttribute('aria-valuemin', '0');
@@ -267,6 +272,16 @@
       fill.style.width = pct + '%';
       track.append(fill);
       panel.append(track);
+    }
+    if (spec.inputs) {
+      // Datos con los que se hizo la comprobación: superficie, cantidad disponible y dosis.
+      const used = el('div', 'cover-inputs');
+      spec.inputs.forEach(([label, text]) => {
+        const cell = el('div', 'cover-input');
+        cell.append(el('span', '', label), el('strong', '', text));
+        used.append(cell);
+      });
+      panel.append(used);
     }
     if (spec.figures) {
       const grid = el('div', 'cover-figures');
@@ -279,10 +294,15 @@
     }
     if (spec.message)
       panel.append(el('p', 'cover-message' + (spec.messageTone ? ' is-' + spec.messageTone : ''), spec.message));
-    const rows = spec.rows.filter((row) => row[1] !== '' && row[1] !== null && row[1] !== undefined);
+    const repeated = (spec.inputs || []).map((row) => row[0]); // ya se muestran como indicadores
+    const rows = spec.rows.filter(
+      (row) => row[1] !== '' && row[1] !== null && row[1] !== undefined && repeated.indexOf(row[0]) < 0,
+    );
     const list = el('dl', 'calc-ctx');
     rows.forEach(([label, text]) => {
-      list.append(el('dt', '', label), el('dd', '', text));
+      const item = el('div', 'calc-ctx-item' + (label === 'Potrero' || label === 'Fuente técnica' ? ' is-wide' : ''));
+      item.append(el('dt', '', label), el('dd', '', text));
+      list.append(item);
     });
     panel.append(list);
     if (spec.secondary) {
@@ -305,9 +325,9 @@
     (spec.warnings || []).forEach((warning) => panel.append(el('p', 'alert', warning)));
     panel.append(el('p', 'callout', 'Cálculo guardado en tu cuenta; también aparece en Reporte.'));
     const actions = el('div', 'calc-result-actions');
-    const pdf = el('button', 'btn-secondary-agro btn-sm', 'Descargar PDF');
+    const pdf = el('button', 'btn-primary-agro btn-sm calc-pdf-main', 'Descargar PDF');
     pdf.type = 'button';
-    pdf.addEventListener('click', () => downloadPdf(spec.pdfTitle || spec.kicker, pdfLines(spec)));
+    pdf.addEventListener('click', () => downloadPdf(spec));
     actions.append(pdf);
     const report = el('a', 'btn-secondary-agro btn-sm', 'Ver en Reportes');
     report.href = '/reportes/?tipo=calculos';
@@ -333,63 +353,34 @@
     form.dispatchEvent(new CustomEvent('flow:result', { detail: { simulation: spec.badge ? !spec.badge.ok : false } }));
   }
 
-  function pdfLines(spec) {
-    const lines = [spec.kicker + ': ' + spec.value + ' ' + spec.unit];
-    if (spec.secondary) lines.push(spec.secondary);
-    spec.rows.filter((row) => row[1]).forEach(([label, text]) => lines.push(label + ': ' + text));
-    (spec.warnings || []).forEach((warning) => lines.push('Advertencia: ' + warning));
-    return lines;
+  // El PDF usa el generador compartido (agro-pdf.js): misma banda de marca que el resto de AgroAsesor.
+  function pdfRows(spec) {
+    const rows = [];
+    if (spec.pdfHeading) rows.push({ heading: spec.pdfHeading });
+    (spec.inputs || []).forEach(([label, text]) => rows.push({ label, value: text }));
+    (spec.figures || []).forEach(([label, text]) => rows.push({ label, value: text }));
+    const repeated = (spec.inputs || []).map((row) => row[0]);
+    spec.rows
+      .filter((row) => row[1] && row[0] !== 'Potrero' && repeated.indexOf(row[0]) < 0)
+      .forEach(([label, text]) => rows.push({ label, value: text }));
+    if (spec.message) rows.push({ label: 'Resultado', value: spec.message });
+    if (spec.secondary) rows.push({ label: spec.formulaTitle || 'Resumen', value: spec.secondary });
+    if (spec.badge) rows.push({ label: 'Estado del dato', value: spec.badge.text });
+    (spec.warnings || []).forEach((warning) => rows.push({ label: 'Advertencia', value: warning }));
+    return rows;
   }
 
-  function downloadPdf(title, lines) {
-    const today = new Date().toLocaleString('es-CL');
-    const all = ['AgroAsesor · ' + title, 'Generado: ' + today, ''].concat(lines, [
-      '',
-      'Resultado orientativo. Verifica etiqueta, fuente técnica y condiciones del potrero antes de aplicar.',
-    ]);
-    const JsPdf = window.jspdf && window.jspdf.jsPDF;
-    if (!JsPdf) {
-      const win = window.open('', '_blank');
-      if (!win) {
-        alert('No se pudo generar el PDF. Revisa tu conexión e inténtalo nuevamente.');
-        return;
-      }
-      const doc = win.document;
-      doc.title = 'AgroAsesor';
-      all.forEach((line) => {
-        const p = doc.createElement('p');
-        p.textContent = line;
-        doc.body.append(p);
-      });
-      win.print();
+  function downloadPdf(spec) {
+    if (!window.AgroPdf) {
+      alert('No se pudo cargar el generador de PDF.');
       return;
     }
-    const doc = new JsPdf({ unit: 'mm', format: 'a4' });
-    let y = 18;
-    doc.setFontSize(15);
-    doc.text(all[0], 15, y);
-    y += 8;
-    doc.setFontSize(10);
-    all.slice(1).forEach((line) => {
-      doc.splitTextToSize(line, 180).forEach((chunk) => {
-        if (y > 280) {
-          doc.addPage();
-          y = 18;
-        }
-        doc.text(chunk, 15, y);
-        y += 6;
-      });
+    const title = spec.pdfTitle || spec.kicker;
+    window.AgroPdf.download('agroasesor-' + window.AgroPdf.slug(title) + '.pdf', title, pdfRows(spec), {
+      badge: spec.badge && !spec.badge.ok ? 'Simulación' : '',
+      result: { label: spec.kicker, value: spec.value + ' ' + spec.unit },
+      note: 'Resultado orientativo. Verifica etiqueta, fuente técnica y condiciones del potrero antes de aplicar.',
     });
-    doc.save(
-      'agroasesor-' +
-        title
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-|-$/g, '') +
-        '.pdf',
-    );
   }
 
   function goToAvailability(info) {
@@ -464,7 +455,21 @@
         : '';
     }
     const syncHelp = setupPlotCrop(form, refresh);
-    f.product.addEventListener('change', sync);
+    // Unidades visibles junto a cada campo: se actualizan con la unidad elegida.
+    function syncUnits() {
+      const base = (f.unit.value || '').replace('/ha', '');
+      const stockTag = form.querySelector('[data-unit-tag="stock"]');
+      const doseTag = form.querySelector('[data-unit-tag="dose"]');
+      if (stockTag) stockTag.textContent = base;
+      if (doseTag) doseTag.textContent = f.unit.value || '';
+    }
+    f.unit.addEventListener('change', syncUnits);
+    f.product.addEventListener('change', () => {
+      sync();
+      syncUnits();
+    });
+    form.addEventListener('flow:refresh', syncUnits);
+    syncUnits();
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       error.textContent = '';
@@ -524,6 +529,13 @@
           value: fmt(Math.min(100, Math.max(0, data.percent)), 0) + ' %',
           unit: 'de la superficie cubierta',
           bar: data.percent,
+          barLabel: ['Cobertura', fmt(data.coveredHa, 2) + ' de ' + fmt(data.area, 2) + ' ha'],
+          pdfHeading: plot.farmName + ' · ' + plot.name,
+          inputs: [
+            ['Superficie del potrero', fmt(plot.areaHa, 2) + ' ha'],
+            ['Superficie a cubrir', fmt(data.area, 2) + ' ha'],
+            ['Dosis', fmt(data.dose, 3) + ' ' + data.dose_unit],
+          ],
           figures: [
             ['Necesario', fmt(data.needed, 2) + ' ' + unitText],
             ['Disponible', fmt(data.stock, 2) + ' ' + unitText],
