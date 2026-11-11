@@ -28,6 +28,20 @@ Funcionan:
 - Catálogo: `GET /api/v1/catalogo/categorias`, `/catalogo/fuentes`, `/catalogo/productos`,
   `/catalogo/productos/{id}`, `/catalogo/referencias-siembra` y `POST /api/v1/catalogo/calcular-sacos`
 - Página de prueba del catálogo: `GET /catalogo`
+- **Fertilizantes** (públicos, sin sesión):
+  - `GET /api/v1/catalogo/fertilizantes` (filtros `nutriente`, `grupo`, `q`), `/catalogo/fertilizantes/{id}` y
+    `/catalogo/fertilizantes/resumen`: 19 fertilizantes con su composición en % de N, P2O5, K2O, Mg y S, el cuadro
+    y la página de la fuente y si el valor fue cotejado.
+  - `POST /api/v1/catalogo/calcular-fertilizante`: kilos de producto para cubrir el requerimiento de nutriente que
+    indica el usuario (no recomienda dosis). Si la fuente da un rango, pide la ley que declara la etiqueta.
+  - `GET /api/v1/catalogo/conversiones` y `/catalogo/convertir?de=P2O5&a=P&valor=46`: factores P2O5↔P y K2O↔K.
+  - `GET /api/v1/catalogo/normativa/contenidos-minimos` y `POST /api/v1/catalogo/revisar-etiqueta`: contenidos
+    mínimos de nutrientes de la Resolución SAG N° 8.651 exenta de 2024.
+- Consola para probar la API y ver las respuestas: `GET /consola` (la raíz `/` redirige ahí)
+
+Fuentes de los fertilizantes (`data/fertilizantes.yaml`): FAO/IFA, *Los fertilizantes y su uso*, 4.ª ed., 2002
+(Cuadros 2 y 3, pp. 38-39; Anexo de conversiones, p. 77) y Resolución SAG N° 8.651 exenta, Diario Oficial del
+18-12-2024 (numeral 3.1.2, Grupo 2). Revisadas el 11-11-2026.
 
 El resto de las rutas de `openapi.yaml` (registro y login, escrituras, actividades, temporadas, calendario,
 predicciones, reportes, administración y cálculos de semillas, fertilizantes y cobertura) responde **501**:
@@ -71,3 +85,13 @@ docker compose -f docker-compose.yml -f docker-compose.api.yml up -d --build
 ```
 
 Las pruebas de integración de Django con la API están en `core/tests/test_api.py`.
+
+## Probar la API en GitHub Codespaces
+
+```bash
+cd /workspaces/PAGINARECTM/Proyecto/backend_flask
+pip install -r requirements.txt
+APP_HOST=0.0.0.0 python run.py
+```
+
+Luego, en la pestaña **Puertos**, abre el puerto **5050**: se verá la consola en `/consola`.

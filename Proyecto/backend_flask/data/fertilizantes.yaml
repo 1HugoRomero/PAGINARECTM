@@ -1,0 +1,230 @@
+# AgroAsesor: composición de referencia de fertilizantes.
+# Cada valor se transcribió de la fuente indicada (cuadro y página) y se revisó contra el documento el 2026-11-11.
+# No contiene marcas, precios, envases ni dosis recomendadas: la dosis depende del análisis de suelo y de la asesoría técnica.
+version: 0.1.0
+fecha_consulta: '2026-11-11'
+aviso_general: >-
+  Composición de referencia (grado típico) publicada por FAO/IFA. El contenido real de un producto es el que declara
+  su etiqueta; el fabricante lo garantiza dentro de límites de tolerancia. No es una recomendación de fertilización.
+
+fuentes:
+  - id: fao_ifa_2002
+    organismo: FAO / IFA
+    titulo: 'Los fertilizantes y su uso. Una guía de bolsillo para los oficiales de extensión. Cuarta edición (Roma, 2002)'
+    url: https://www.fertilizer.org/wp-content/uploads/2023/01/2002_IFA_FAO_fertilizantesuso.pdf
+    registro_fao: https://agris.fao.org/search/en/records/647241a908fd68d5460035aa
+    tipo: publicacion_tecnica
+  - id: sag_res_8651_2024
+    organismo: SAG / Ministerio de Agricultura
+    titulo: 'Resolución N° 8.651 exenta de 2024: establece contenidos mínimos de elementos nutricionales y contenidos máximos de elementos contaminantes en fertilizantes y bioestimulantes (Diario Oficial N° 44.027, 18-12-2024)'
+    url: https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/18/44027/01/2585124.pdf
+    tipo: normativa
+
+# Nutrientes tal como los expresa la fuente FAO/IFA (columnas del Cuadro 2): N, P2O5, K2O, Mg y S, en % del producto.
+nutrientes:
+  - id: N
+    nombre: Nitrógeno
+  - id: P2O5
+    nombre: Fósforo (como P2O5)
+  - id: K2O
+    nombre: Potasio (como K2O)
+  - id: Mg
+    nombre: Magnesio
+  - id: S
+    nombre: Azufre
+
+grupos:
+  - id: nitrogenados
+    nombre: Fertilizantes nitrogenados
+  - id: fosfatados
+    nombre: Fertilizantes fosfatados
+  - id: potasicos
+    nombre: Fertilizantes potásicos
+  - id: magnesio
+    nombre: Fertilizantes de magnesio
+  - id: azufrados
+    nombre: Fertilizantes azufrados
+  - id: multinutrientes
+    nombre: Fertilizantes multinutrientes
+
+# Valores: número fijo o [mínimo, máximo] cuando la fuente da un rango.
+# estado_verificacion: cotejada_con_fuente = leído en el documento; citada_sin_cotejar = la fila no se pudo leer sin ambigüedad.
+fertilizantes:
+  - id: urea
+    nombre: Urea
+    formula: CO(NH2)2
+    grupo: nitrogenados
+    nutrientes: {N: [45, 46]}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    estado_verificacion: cotejada_con_fuente
+  - id: sulfato-amonico
+    nombre: Sulfato amónico
+    formula: (NH4)2SO4
+    grupo: nitrogenados
+    nutrientes: {N: 21, S: 23}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: nitrato-amonico
+    nombre: Nitrato amónico
+    formula: NH4NO3
+    grupo: nitrogenados
+    nutrientes: {N: [33, 34.5]}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: nitrato-amonico-calcico
+    nombre: Nitrato amónico-cálcico (nitrato amónico-cal)
+    formula: NH4NO3 + CaCO3
+    grupo: nitrogenados
+    nutrientes: {N: [20.5, 26]}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: nitrato-sodico
+    nombre: Nitrato sódico (salitre sódico)
+    formula: NaNO3
+    grupo: nitrogenados
+    nutrientes: {N: 16}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    estado_verificacion: cotejada_con_fuente
+  - id: nitrosulfato-amonico
+    nombre: Nitrosulfato amónico
+    formula: NH4NO3·(NH4)2SO4
+    grupo: nitrogenados
+    nutrientes: {N: 26, S: 15}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    estado_verificacion: cotejada_con_fuente
+  - id: superfosfato-simple
+    nombre: Superfosfato simple
+    formula: Ca(H2PO4)2 + CaSO4
+    grupo: fosfatados
+    nutrientes: {P2O5: [16, 20], S: 12}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: superfosfato-triple
+    nombre: Superfosfato triple (concentrado)
+    formula: Ca(H2PO4)2
+    grupo: fosfatados
+    nutrientes: {P2O5: 46}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: fosfato-roca
+    nombre: Fosfato de roca molido (fosfato mineral)
+    formula: null
+    grupo: fosfatados
+    nutrientes: {P2O5: [20, 40]}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: fosfato-dicalcico
+    nombre: Fosfato dicálcico
+    formula: CaHPO4
+    grupo: fosfatados
+    nutrientes: {P2O5: [35, 42]}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    estado_verificacion: cotejada_con_fuente
+  - id: escoria-thomas
+    nombre: Escoria Thomas
+    formula: null
+    grupo: fosfatados
+    nutrientes: {P2O5: [16, 20], Mg: [1, 3]}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    estado_verificacion: cotejada_con_fuente
+  - id: cloruro-potasico
+    nombre: Muriato o cloruro potásico
+    formula: KCl
+    grupo: potasicos
+    nutrientes: {K2O: 60}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: sulfato-potasico
+    nombre: Sulfato potásico
+    formula: K2SO4
+    grupo: potasicos
+    nutrientes: {K2O: 50, S: 18}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: sulfato-potasico-magnesico
+    nombre: Sulfato potásico-magnésico
+    formula: K2SO4·2MgSO4
+    grupo: potasicos
+    nutrientes: {K2O: [26, 30], Mg: [5, 7], S: [16, 22]}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    estado_verificacion: cotejada_con_fuente
+  - id: kieserita
+    nombre: Kieserita
+    formula: MgSO4·7H2O
+    grupo: magnesio
+    nutrientes: {Mg: 16, S: 22}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: kieserita-calcinada
+    nombre: Kieserita calcinada
+    formula: MgSO4·H2O
+    grupo: magnesio
+    nutrientes: {Mg: 20, S: 27}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 2, p. 38
+    estado_verificacion: cotejada_con_fuente
+  - id: yeso
+    nombre: Yeso
+    formula: CaSO4·2H2O
+    grupo: azufrados
+    nutrientes: {S: [16, 18]}
+    fuente_id: fao_ifa_2002
+    ubicacion: Texto del capítulo, p. 39 («el azufre es también contenido en el yeso (16-18 por ciento de S)»)
+    estado_verificacion: cotejada_con_fuente
+  - id: fosfato-diamonico
+    nombre: Fosfato diamónico (DAP)
+    formula: (NH4)2HPO4
+    grupo: multinutrientes
+    nutrientes: {N: [16, 18], P2O5: [42, 48]}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 3, p. 39 (rango); el texto de la p. 45 usa 18 % N y 46 % P2O5
+    estado_verificacion: cotejada_con_fuente
+  - id: fosfato-monoamonico
+    nombre: Fosfato monoamónico (MAP)
+    formula: NH4H2PO4
+    grupo: multinutrientes
+    nutrientes: {N: 11, P2O5: 52}
+    fuente_id: fao_ifa_2002
+    ubicacion: Cuadro 3, p. 39
+    estado_verificacion: citada_sin_cotejar
+    nota: La fila del Cuadro 3 aparece desalineada en la versión digital; confirmar con la etiqueta del producto.
+
+# Anexo «Factores de conversión», p. 77 de la misma guía FAO/IFA.
+conversiones:
+  fuente_id: fao_ifa_2002
+  ubicacion: Anexo «Factores de conversión», p. 77
+  factores:
+    - {de: P2O5, a: P, factor: 0.4364}
+    - {de: P, a: P2O5, factor: 2.2914}
+    - {de: K2O, a: K, factor: 0.8302}
+    - {de: K, a: K2O, factor: 1.2046}
+
+# Resolución SAG N° 8.651 exenta (2024), numeral 3.1.2, Grupo 2: fertilizantes inorgánicos, A. Contenidos mínimos.
+# Los nutrientes se expresan como óxidos (MgO, CaO, SO3, Na2O), no como Mg o S elementales.
+normativa_contenidos_minimos:
+  fuente_id: sag_res_8651_2024
+  ubicacion: Numeral 3.1.2, Grupo 2 (fertilizantes inorgánicos), letra A
+  vigencia: >-
+    El numeral 5 del Resuelvo indica que los fertilizantes y bioestimulantes deben cumplir las exigencias del decreto
+    N° 61 a partir de la entrada en vigencia de ese decreto.
+  un_macronutriente:
+    descripcion: Fertilizantes compuestos exclusivamente por un macronutriente (numeral i).
+    minimos_pct: {N: 5, P2O5: 5, K2O: 3, MgO: 2, CaO: 6, SO3: 5, Na2O: 1}
+  varios_macronutrientes:
+    descripcion: Fertilizantes con dos o más macronutrientes (numeral ii).
+    minimos_pct: {N: 1.5, P2O5: 1.5, K2O: 1.5, MgO: 0.5, CaO: 0.5, SO3: 0.5, Na2O: 0.5}
