@@ -1,4 +1,5 @@
 import os
+from io import StringIO
 import json
 import re
 from datetime import timedelta
@@ -2963,19 +2964,41 @@ class CatalogCsvAndUsoTests(TestCase):
         self.assertTrue(UsoInsumoCultivo.objects.get().recomendable)
 
     def test_initial_csv_loads_only_crop_names_and_zone_without_invented_technical_data(self):
+        """data/ carga cultivos, la zona y los 5 insumos de referencia (con su categoría y cultivo) sin inventar datos."""
         from pathlib import Path
         from django.conf import settings
 
         data_dir = Path(settings.BASE_DIR) / 'data'
-        self.run_import(str(data_dir), '--aplicar')
+        self.run_import(str(data_dir), '--aplicar')  # sin --categorias: las categorías se crean al haber insumos
         self.run_import(str(data_dir), '--aplicar')  # repetir no duplica ni modifica
         self.assertGreater(Cultivo.objects.count(), 40)
         self.assertEqual(Cultivo.objects.filter(nombre='Maíz').count(), 1)
         self.assertEqual(Zona.objects.filter(nombre='Melipilla', activo=True).count(), 1)
-        # Sin densidades, rendimientos, insumos ni referencias inventadas.
+        # Sin densidades ni rendimientos inventados.
         self.assertFalse(Cultivo.objects.filter(densidad_siembra__isnull=False).exists())
         self.assertFalse(Cultivo.objects.filter(rendimiento_ton_ha__isnull=False).exists())
-        self.assertEqual(Insumo.objects.count(), 0)
+        # Insumos de data/insumos.csv: exactamente una vez cada uno y bien asociados.
+        expected = {
+            'Semilla de trigo': ('Semilla', 'Trigo'),
+            'Semilla de arroz': ('Semilla', 'Arroz'),
+            'Papa semilla': ('Semilla', 'Papa'),
+            'Urea (referencia de fertilizante)': ('Fertilizante', None),
+            'Mezcla fertilizante N-P-K (referencia)': ('Fertilizante', None),
+        }
+        self.assertEqual(Insumo.objects.count(), len(expected))
+        for name, (kind, crop) in expected.items():
+            with self.subTest(insumo=name):
+                item = Insumo.objects.select_related('tipo', 'cultivo').get(nombre=name)
+                self.assertEqual(item.tipo.nombre, kind)
+                self.assertEqual(item.cultivo.nombre if item.cultivo else None, crop)
+                self.assertTrue(item.vigente)
+                self.assertEqual(item.estado_verificacion, 'unverified')
+                self.assertTrue(item.fuente_url.startswith('https://'))
+        # Sin dosis, autorizaciones SAG ni referencias técnicas inventadas.
+        self.assertFalse(Insumo.objects.filter(dosis_hectarea__isnull=False).exists())
+        self.assertFalse(Insumo.objects.filter(dosis_verificada=True).exists())
+        self.assertFalse(Insumo.objects.exclude(numero_autorizacion_sag='').exists())
+        self.assertEqual(TipoInsumo.objects.filter(nombre='Semilla').count(), 1)
 
     def test_invalid_csv_value_is_rejected_and_rolls_back(self):
         from django.core.management.base import CommandError
@@ -4423,9 +4446,178 @@ class MelipillaDefaultZoneTests(IntegrationBase):
 
     def test_entrypoint_loads_base_crops_and_zone_on_start(self):
         source = (Path(__file__).resolve().parent.parent.parent / 'docker-entrypoint.sh').read_text(encoding='utf-8')
-        self.assertIn('python manage.py importar_catalogo data --aplicar', source)
-        self.assertLess(source.index('migrate'), source.index('importar_catalogo data --aplicar'))
+        # El arranque usa la carga CONTROLADA (solo importa si los CSV cambiaron), después de migrate.
+        self.assertIn('python manage.py cargar_catalogo_inicial data', source)
+        self.assertLess(source.index('migrate'), source.index('cargar_catalogo_inicial data'))
+        # Ya no hay importaciones incondicionales en cada arranque.
+        self.assertNotIn('importar_catalogo data --aplicar', source)
+        self.assertNotIn('--actualizar', source)
         self.assertNotIn('\r', source)  # el script debe tener saltos de línea LF para ejecutarse en Linux
+
+
+class CargaCatalogoInicialTests(TestCase):
+    """cargar_catalogo_inicial: carga data/*.csv una sola vez por versión de los CSV, sin duplicar ni pisar nada."""
+
+    NOMBRES = {
+        'Semilla de trigo',
+        'Semilla de arroz',
+        'Papa semilla',
+        'Urea (referencia de fertilizante)',
+        'Mezcla fertilizante N-P-K (referencia)',
+    }
+
+    def cargar(self, *args):
+        out = StringIO()
+        call_command('cargar_catalogo_inicial', *args, stdout=out)
+        return out.getvalue()
+
+    def copia_de_data(self):
+        import shutil
+        import tempfile
+        from django.conf import settings
+
+        destino = Path(tempfile.mkdtemp()) / 'data'
+        shutil.copytree(Path(settings.BASE_DIR) / 'data', destino)
+        self.addCleanup(shutil.rmtree, destino.parent, True)
+        return destino
+
+    def test_primera_carga_crea_insumos_y_registra_la_carga(self):
+        from ..models import CargaCatalogo
+
+        salida = self.cargar()
+        self.assertIn('Catálogo inicial cargado', salida)
+        self.assertEqual(set(Insumo.objects.values_list('nombre', flat=True)), self.NOMBRES)
+        carga = CargaCatalogo.objects.get()
+        self.assertEqual(len(carga.huella), 64)
+        self.assertIn('insumos.csv', carga.archivos)
+        self.assertIn('Insumos: 5 nuevos', carga.resumen)
+        self.assertFalse(carga.forzada)
+
+    def test_segunda_ejecucion_no_importa_ni_duplica(self):
+        from ..models import CargaCatalogo
+
+        self.cargar()
+        totales = (Insumo.objects.count(), Cultivo.objects.count(), Zona.objects.count(), TipoInsumo.objects.count())
+        salida = self.cargar()  # como un reinicio del contenedor
+        self.assertIn('sin cambios', salida)
+        self.assertNotIn('Insumos:', salida)
+        self.assertEqual(
+            (Insumo.objects.count(), Cultivo.objects.count(), Zona.objects.count(), TipoInsumo.objects.count()),
+            totales,
+        )
+        self.assertEqual(CargaCatalogo.objects.count(), 1)
+
+    def test_forzar_no_duplica(self):
+        from ..models import CargaCatalogo
+
+        self.cargar()
+        salida = self.cargar('--forzar')
+        self.assertIn('Insumos: 0 nuevos, 0 actualizados, 5 sin cambios', salida)
+        self.assertEqual(Insumo.objects.count(), 5)
+        for nombre in self.NOMBRES:
+            self.assertEqual(Insumo.objects.filter(nombre=nombre).count(), 1)
+        self.assertEqual(CargaCatalogo.objects.count(), 2)
+        self.assertTrue(CargaCatalogo.objects.first().forzada)
+
+    def test_simular_no_guarda_nada(self):
+        from ..models import CargaCatalogo
+
+        salida = self.cargar('--simular')
+        self.assertIn('Insumos: 5 nuevos', salida)
+        self.assertIn('no se guardó nada', salida)
+        self.assertFalse(Insumo.objects.exists())
+        self.assertFalse(Cultivo.objects.exists())
+        self.assertFalse(CargaCatalogo.objects.exists())
+
+    def test_no_sobrescribe_ni_elimina_registros_personalizados(self):
+        # Un administrador ya corrigió un insumo del CSV y creó uno propio; un agricultor lo usa en su cuaderno.
+        tipo_semilla = TipoInsumo.objects.create(nombre='Semilla')
+        tipo_fert = TipoInsumo.objects.create(nombre='Fertilizante')
+        trigo = Cultivo.objects.create(nombre='Trigo')
+        editado = Insumo.objects.create(
+            nombre='Semilla de trigo', tipo=tipo_semilla, cultivo=trigo,
+            descripcion='Corregido a mano', fabricante='Semillas del Sur',
+        )
+        propio = Insumo.objects.create(nombre='Compost del predio', tipo=tipo_fert, descripcion='Propio')
+        user = User.objects.create_user('agri', email='agri@example.com', password=PASSWORD)
+        predio = Predio.objects.create(propietario=user, nombre='Campo', ubicacion='Melipilla', superficie_ha=5)
+        potrero = Potrero.objects.create(predio=predio, nombre='P1', superficie_ha=1, perimetro=[])
+        actividad = ActividadAgricola.objects.create(
+            usuario=user, potrero=potrero, nombre='Siembra', tipo='siembra',
+            fecha_programada=timezone.localdate(), insumo=editado,
+        )
+
+        self.cargar()
+        self.cargar('--forzar')
+
+        editado.refresh_from_db()
+        self.assertEqual((editado.descripcion, editado.fabricante), ('Corregido a mano', 'Semillas del Sur'))
+        self.assertEqual(editado.fuente_url, '')  # el CSV no lo sobrescribió
+        self.assertTrue(Insumo.objects.filter(pk=propio.pk, descripcion='Propio').exists())
+        self.assertEqual(Insumo.objects.filter(nombre='Semilla de trigo').count(), 1)
+        self.assertEqual(Insumo.objects.count(), 6)  # 5 del CSV (uno ya existía) + el propio
+        actividad.refresh_from_db()
+        self.assertEqual(actividad.insumo_id, editado.pk)
+        self.assertEqual(Cultivo.objects.filter(nombre='Trigo').count(), 1)
+
+    def test_csv_modificado_solo_agrega_lo_nuevo(self):
+        from ..models import CargaCatalogo
+
+        carpeta = self.copia_de_data()
+        self.cargar(str(carpeta))
+        insumo = Insumo.objects.get(nombre='Papa semilla')
+        insumo.descripcion = 'Editado en /admin/'
+        insumo.save()
+        with open(carpeta / 'insumos.csv', 'a', encoding='utf-8') as archivo:
+            columnas = (carpeta / 'insumos.csv').read_text(encoding='utf-8').splitlines()[0]
+            sep = ';' if ';' in columnas else ','
+            fila = {c: '' for c in columnas.split(sep)}
+            fila.update(nombre='Semilla de maíz TEST', tipo='Semilla', cultivo='Maíz')
+            archivo.write(sep.join(fila[c] for c in columnas.split(sep)) + '\n')
+        salida = self.cargar(str(carpeta))
+        self.assertIn('Insumos: 1 nuevos, 0 actualizados, 5 sin cambios', salida)
+        self.assertEqual(Insumo.objects.count(), 6)
+        self.assertEqual(Insumo.objects.get(nombre='Semilla de maíz TEST').cultivo.nombre, 'Maíz')
+        self.assertEqual(Insumo.objects.get(nombre='Papa semilla').descripcion, 'Editado en /admin/')
+        self.assertEqual(CargaCatalogo.objects.count(), 2)
+
+    def test_error_en_csv_no_deja_carga_a_medias(self):
+        from django.core.management.base import CommandError
+        from ..models import CargaCatalogo
+
+        carpeta = self.copia_de_data()
+        with open(carpeta / 'insumos.csv', 'a', encoding='utf-8') as archivo:
+            columnas = (carpeta / 'insumos.csv').read_text(encoding='utf-8').splitlines()[0]
+            sep = ';' if ';' in columnas else ','
+            fila = {c: '' for c in columnas.split(sep)}
+            fila.update(nombre='Insumo con cultivo inexistente', tipo='Semilla', cultivo='Cultivo que no existe')
+            archivo.write(sep.join(fila[c] for c in columnas.split(sep)) + '\n')
+        with self.assertRaises(CommandError):
+            self.cargar(str(carpeta))
+        self.assertFalse(Insumo.objects.exists())
+        self.assertFalse(Cultivo.objects.exists())
+        self.assertFalse(CargaCatalogo.objects.exists())
+
+    def test_insumos_disponibles_en_catalogo_decisiones_y_cuaderno(self):
+        self.cargar()
+        user = User.objects.create_user('ana', email='ana@example.com', password=PASSWORD)
+        Predio.objects.create(propietario=user, nombre='Campo', ubicacion='Melipilla', superficie_ha=5)
+        self.client.force_login(user)
+        productos = self.client.get('/productos/')
+        self.assertEqual(productos.status_code, 200)
+        for nombre in ('Semilla de trigo', 'Papa semilla', 'Urea (referencia de fertilizante)'):
+            self.assertContains(productos, nombre)
+        # El Centro de decisiones recibe los insumos en su catálogo (con categoría y cultivo).
+        from ..catalog import catalog_payload
+
+        catalogo = {item['name']: item for item in catalog_payload()['insumos']}
+        self.assertEqual(set(catalogo), self.NOMBRES)
+        self.assertEqual(catalogo['Semilla de trigo']['category'], 'seed')
+        self.assertEqual(catalogo['Semilla de trigo']['crop'], 'Trigo')
+        self.assertEqual(catalogo['Urea (referencia de fertilizante)']['category'], 'fertilizer')
+        self.assertContains(self.client.get('/decisiones/'), 'Semilla de trigo')
+        # El cuaderno de campo los ofrece al registrar una actividad.
+        self.assertContains(self.client.get('/actividades/nueva/'), 'Semilla de arroz')
 
 
 class DecisionsContinuityStaticTests(TestCase):

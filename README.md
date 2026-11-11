@@ -97,6 +97,20 @@ Zonas, cultivos, problemas, insumos y referencias se cargan desde los CSV de `da
 Ningún dato técnico se inventa: completa cada fila solo con valores de una fuente oficial
 (SAG, ODEPA, INIA o la etiqueta del fabricante).
 
+**Carga inicial controlada (recomendada).** Al arrancar el contenedor se ejecuta
+`cargar_catalogo_inicial`, que importa `data/*.csv` (cultivos, zona Melipilla e insumos de referencia
+con sus categorías) **solo si los CSV cambiaron** desde la última carga registrada (tabla `CargaCatalogo`,
+visible en `/admin/`). Un reinicio normal no importa nada. Nunca duplica, sobrescribe ni borra registros:
+lo que ya existe (por ejemplo, un insumo corregido en `/admin/`) se deja tal cual.
+
+```powershell
+python manage.py cargar_catalogo_inicial            # carga data/ si es nueva o cambió
+python manage.py cargar_catalogo_inicial --simular  # muestra qué haría, sin guardar
+python manage.py cargar_catalogo_inicial --forzar   # revisa de nuevo los CSV (solo agrega lo que falte)
+```
+
+Importación manual (para otros archivos o para corregir registros existentes):
+
 ```powershell
 python manage.py importar_catalogo --categorias                   # categorías de insumo (una vez)
 python manage.py importar_catalogo data                           # solo valida, no guarda

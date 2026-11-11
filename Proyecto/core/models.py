@@ -1004,3 +1004,26 @@ class UsoInsumoCultivo(models.Model):
 
     def __str__(self):
         return f'{self.insumo} → {self.problema} en {self.cultivo}'
+
+
+class CargaCatalogo(models.Model):
+    """Registro de cada carga controlada del catálogo inicial (data/*.csv).
+
+    Guarda la huella SHA-256 de los CSV cargados: si los archivos no cambian, la carga no se repite al reiniciar.
+    Solo se agrega un registro; nunca borra ni modifica datos del catálogo ni de los agricultores.
+    """
+
+    huella = models.CharField(max_length=64, db_index=True)
+    carpeta = models.CharField(max_length=255)
+    archivos = models.JSONField(default=list)
+    resumen = models.TextField(blank=True)
+    forzada = models.BooleanField(default=False)
+    aplicada = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-aplicada', '-pk']
+        verbose_name = 'carga del catálogo inicial'
+        verbose_name_plural = 'cargas del catálogo inicial'
+
+    def __str__(self):
+        return f'{self.carpeta} · {self.huella[:12]} · {self.aplicada:%d/%m/%Y %H:%M}'
