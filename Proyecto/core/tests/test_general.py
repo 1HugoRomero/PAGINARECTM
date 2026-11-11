@@ -3206,8 +3206,7 @@ class PredioPotreroFlowAndPrivacyTests(TestCase):
         self.assertNotContains(page, 'Ya registraste el límite completo de tu predio')
         for text in (
             '¿Cómo deseas organizar tu predio?',
-            'Puedes utilizar toda la superficie como un solo potrero o dividirla en sectores para gestionar tus '
-            'cultivos y actividades agrícolas por separado.',
+            'Elige una opción para comenzar a gestionar la superficie de',
             'Un solo potrero',
             'Utilizar todo el predio',
             'Dividir en potreros',
@@ -3528,7 +3527,7 @@ class ButtonHierarchyAndNextStepTests(TestCase):
         detail = self.page(f'/predios/{farm.pk}/')
         # Sin potreros la ficha ofrece una sola guía («¿Cómo deseas organizar tu predio?»), no además «Siguiente paso».
         self.assertIn('¿Cómo deseas organizar tu predio?', detail)
-        self.assertNotIn('Siguiente paso', detail)
+        self.assertNotIn('next-step-line', detail)  # «Siguiente paso» es ahora el rótulo del asistente
         self.assertIn(f'/predios/{farm.pk}/potreros/nuevo/', detail)
         self.assertNotIn('Registrar potrero', detail)
         self.assertNotIn('Planificación de siembra', detail)
@@ -3598,7 +3597,7 @@ class ButtonHierarchyAndNextStepTests(TestCase):
         self.assertIn('Utilizar todo el predio', html)
         self.assertIn('Dividir mi predio', html)
         self.assertIn('Lo haré más tarde', html)
-        self.assertNotIn('Siguiente paso', html)
+        self.assertNotIn('next-step-line', html)
         self.assertNotIn('Agregar potrero', html)
         self.assertNotIn('Registrar potrero', html)
         self.assertEqual(html.count('Utilizar todo el predio'), 1)

@@ -546,6 +546,9 @@
     return spec.badge.ok ? 'Cálculo real · dato documentado' : 'Simulación · dato sin fuente verificada';
   }
 
+  // Filas del resumen que ocupan el ancho completo (textos largos); el resto va en indicadores de dos columnas.
+  const WIDE_ROWS = ['Potrero', 'Tipo de cálculo'];
+
   function paint(spec) {
     const sourceLink =
       spec.sourceUrl && safeUrl(spec.sourceUrl)
@@ -591,7 +594,18 @@
       '</span></p>' +
       (spec.headline ? '<p class="calc-headline">' + spec.headline + '</p>' : '') +
       '<dl class="calc-ctx">' +
-      ctxRows.map((row) => '<dt>' + esc(row[0]) + '</dt><dd>' + esc(row[1]) + '</dd>').join('') +
+      ctxRows
+        .map(
+          (row) =>
+            '<div class="calc-ctx-item' +
+            (WIDE_ROWS.indexOf(row[0]) >= 0 ? ' is-wide' : '') +
+            '"><dt>' +
+            esc(row[0]) +
+            '</dt><dd>' +
+            esc(row[1]) +
+            '</dd></div>',
+        )
+        .join('') +
       '</dl>' +
       '<div class="formula-box"><p class="formula-line">' +
       esc(spec.formulaTitle || 'Cantidad = superficie × dosis') +
@@ -669,7 +683,14 @@
     };
   }
 
+  // La unidad elegida se muestra junto al campo de dosis para que no haya dudas de qué se está ingresando.
+  function syncUnitTag() {
+    const tag = document.getElementById('calc-dose-unit');
+    if (tag) tag.textContent = ui.unit.value || '';
+  }
+
   function renderPreview() {
+    syncUnitTag();
     ui.error.textContent = '';
     fieldError(ui.area, '');
     fieldError(ui.dose, '');
@@ -1221,6 +1242,7 @@
       { label: 'Superficie', value: fmt(meta.area !== undefined ? meta.area : 0, 3) + ' ha' },
       { label: 'Dosis', value: fmt(meta.dose) + ' ' + (meta.doseUnit || '') },
       { label: 'Cantidad a llevar', value: fmt(spec.amount) + ' ' + spec.unit },
+      { label: 'Tipo de cálculo', value: typeLabel(spec) },
       { label: 'Estado del dato', value: spec.badge.text },
       { label: 'Fuente técnica', value: meta.source || 'Sin fuente verificada' },
     ]
@@ -1228,6 +1250,7 @@
       .concat((spec.notes || []).map((note) => ({ label: 'Nota', value: note })));
     window.AgroPdf.download(meta.file || 'calculo.pdf', meta.title || 'Cálculo', rows, {
       badge: spec.badge.ok ? '' : 'Simulación',
+      result: { label: spec.kicker, value: fmt(spec.amount) + ' ' + spec.unit },
     });
   }
 

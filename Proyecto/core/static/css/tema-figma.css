@@ -1,0 +1,253 @@
+/* ══════════ Tema AgroAsesor según el prototipo de Figma (todas las pantallas) ══════════
+   Se carga después de body.css. Cambia la paleta (variables), la tipografía, el menú lateral,
+   la cabecera, tarjetas y botones; no toca estructura ni comportamiento.
+   Para volver al aspecto anterior basta quitar este archivo de body.html. */
+:root {
+    --bg: #f6f8f7;
+    --paper: #ffffff;
+    --ink: #0f1b2d;
+    --muted: #64748b;
+    --line: #e6eaee;
+    --green: #0b6b4b;
+    --green-dark: #0f1b2d;
+    --green-soft: #e6f7ef;
+    --green-light: #34b27b;
+    --leaf: #0b9a66;
+    --forest: #0b6b4b;
+    --forest-2: #095a3f;
+    --radius: 20px;
+    --shadow: 0 1px 2px rgba(15, 27, 45, .04), 0 8px 24px rgba(15, 27, 45, .04);
+}
+
+/* Una sola tipografía en todo el proyecto. */
+.app-body,
+.app-body button,
+.app-body input,
+.app-body select,
+.app-body textarea {
+    font-family: Outfit, "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.app-body {
+    background: var(--bg);
+    color: #334155;
+}
+
+.app-body h1,
+.app-body h2,
+.app-body h3,
+.app-body h4 {
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.app-body .page-title {
+    color: var(--ink);
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 1.95rem);
+    font-weight: 600;
+    letter-spacing: -.02em;
+}
+
+.app-body .page-sub {
+    color: var(--muted);
+    font-weight: 300;
+}
+
+.app-body strong,
+.app-body b,
+.app-body th {
+    font-weight: 600;
+}
+
+/* Tarjetas y botones */
+.app-body .card {
+    border-color: var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.app-body .btn-primary-agro,
+.app-body .btn-secondary-agro,
+.app-body .btn-ghost-agro,
+.app-body .btn-danger-agro,
+.app-body .btn-disabled {
+    border-radius: 14px;
+    font-weight: 600;
+}
+
+.app-body .btn-primary-agro {
+    background: var(--green);
+    border-color: var(--green);
+}
+
+.app-body .btn-primary-agro:hover {
+    background: var(--forest-2);
+    border-color: var(--forest-2);
+}
+
+.app-body .btn-secondary-agro {
+    border-color: var(--line);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(15, 27, 45, .05);
+}
+
+.app-body .btn-secondary-agro:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.app-body .state-chip {
+    font-weight: 600;
+}
+
+.app-body .state-chip.is-green {
+    background: #d5f5e6;
+    border-color: #a9e4c9;
+    color: #047857;
+}
+
+.app-body .state-chip.is-dark {
+    background: var(--green);
+}
+
+/* ── Menú lateral y cabecera ── */
+.app-body .sidebar {
+    padding: 22px 16px;
+    border-right: 1px solid #e6eaee;
+    background: #fff;
+}
+
+.app-body .brand {
+    gap: 12px;
+    padding: 6px 8px 26px;
+    color: #0f1b2d;
+}
+
+.app-body .brand strong {
+    color: #0b6b4b;
+    font-size: 1.28rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.app-body .brand small {
+    max-width: 150px;
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: .62rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.app-body .logo {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: #0b7a53;
+    color: #fff;
+}
+
+.app-body .logo svg {
+    width: 24px;
+    height: 24px;
+}
+
+.app-body .sidebar-primary-nav {
+    gap: 4px;
+}
+
+.app-body .sidebar .nav-link,
+.app-body .sidebar .nav-sublink {
+    gap: 14px;
+    min-height: 48px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 14px;
+    color: #475569;
+    font-size: .98rem;
+    font-weight: 400;
+}
+
+.app-body .sidebar .nav-link svg,
+.app-body .sidebar .nav-sublink svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    stroke-width: 1.6;
+}
+
+.app-body .sidebar .nav-link:hover,
+.app-body .sidebar .nav-sublink:hover,
+.app-body .sidebar .nav-link:focus-visible,
+.app-body .sidebar .nav-sublink:focus-visible {
+    background: #f1f5f9;
+    color: #0f1b2d;
+}
+
+.app-body .sidebar .nav-link:focus-visible,
+.app-body .sidebar .nav-sublink:focus-visible {
+    outline: 2px solid #0b6b4b;
+    outline-offset: -2px;
+}
+
+.app-body .sidebar .nav-link.is-active,
+.app-body .sidebar .nav-sublink.is-active {
+    background: #e6f7ef;
+    color: #0b6b4b;
+    font-weight: 500;
+}
+
+/* Punto verde del ítem activo (los grupos desplegables ya llevan su flecha). */
+.app-body .sidebar a.nav-link.is-active::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: #0b9a66;
+}
+
+.app-body .nav-sub {
+    border-left-color: #e6eaee;
+}
+
+.app-body .topbar {
+    padding: 14px 36px;
+    box-shadow: 0 1px 0 #e6eaee;
+}
+
+.app-body .topbar .global-search {
+    max-width: 520px;
+    border-color: #e6eaee;
+    background: #f8fafc;
+}
+
+.app-body .topbar .icon-button {
+    border-color: transparent;
+    color: #475569;
+}
+
+.app-body .topbar .icon-button:hover {
+    background: #f1f5f9;
+}
+
+.app-body .topbar .note-dot {
+    background: #0b9a66;
+}
+
+.app-body .topbar .avatar {
+    background: #0f1b2d;
+}
+
+.app-body .topbar .profile {
+    border-color: transparent;
+    color: #0f1b2d;
+}
+
+@media (max-width: 640px) {
+    .app-body .topbar {
+        padding: 10px 14px;
+    }
+}

@@ -1,5 +1,27 @@
 (() => {
   'use strict';
+  // Pestañas Información / Historial: funcionan aunque el predio no tenga geometría (sin mapa).
+  const tabs = [
+    [document.getElementById('tab-information'), document.getElementById('predio-information')],
+    [document.getElementById('tab-history'), document.getElementById('predio-history')],
+  ];
+  const activateTab = (button) => {
+    tabs.forEach(([otherButton, otherPanel]) => {
+      if (!otherButton || !otherPanel) return;
+      const selected = otherButton === button;
+      otherButton.classList.toggle('is-active', selected);
+      otherButton.setAttribute('aria-selected', String(selected));
+      otherPanel.hidden = !selected;
+    });
+  };
+  tabs.forEach(([button, panel]) => {
+    if (!button || !panel) return;
+    button.addEventListener('click', () => activateTab(button));
+  });
+  if (window.location.hash === '#predio-history') {
+    activateTab(document.getElementById('tab-history'));
+  }
+
   const geometryNode = document.getElementById('predio-detail-geometry');
   const mapElement = document.getElementById('predio-detail-map');
   const configNode = document.getElementById('maps-config');
@@ -53,7 +75,7 @@
     });
   });
   const polygon = L.geoJSON(geometry, {
-    style: { color: '#255b37', weight: 3, fillColor: '#74a567', fillOpacity: 0.3 },
+    style: { color: '#0b6b4b', weight: 3, fillColor: '#34b27b', fillOpacity: 0.26 },
   }).addTo(map);
   if (polygon.getBounds().isValid()) map.fitBounds(polygon.getBounds(), { padding: [24, 24] });
 
@@ -64,7 +86,7 @@
   vertices.forEach(([longitude, latitude]) => {
     L.circleMarker([latitude, longitude], {
       radius: 4,
-      color: '#1e3d28',
+      color: '#0b6b4b',
       fillColor: '#fff',
       fillOpacity: 1,
       weight: 2,
@@ -79,25 +101,15 @@
     });
   }
 
-  const tabs = [
-    [document.getElementById('tab-information'), document.getElementById('predio-information')],
-    [document.getElementById('tab-history'), document.getElementById('predio-history')],
-  ];
-  const activateTab = (button) => {
-    tabs.forEach(([otherButton, otherPanel]) => {
-      if (!otherButton || !otherPanel) return;
-      const selected = otherButton === button;
-      otherButton.classList.toggle('is-active', selected);
-      otherButton.setAttribute('aria-selected', String(selected));
-      otherPanel.hidden = !selected;
-    });
-  };
-  tabs.forEach(([button, panel]) => {
-    if (!button || !panel) return;
-    button.addEventListener('click', () => activateTab(button));
-  });
-  if (window.location.hash === '#predio-history') {
-    activateTab(document.getElementById('tab-history'));
+  // Indicador con el nivel de zoom real del mapa.
+  const zoomChip = document.getElementById('predio-map-zoom');
+  if (zoomChip) {
+    const showZoom = () => {
+      zoomChip.textContent = 'Zoom ' + map.getZoom();
+      zoomChip.hidden = false;
+    };
+    map.on('zoomend', showZoom);
+    showZoom();
   }
   window.setTimeout(() => map.invalidateSize(), 0);
 })();
