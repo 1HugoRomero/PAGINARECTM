@@ -132,7 +132,7 @@ class LoginVistaOficialTests(TestCase):
             self.assertIn('class="access-shell', html)
             self.assertIn('<section class="access-visual" aria-hidden="true">', html)
             self.assertIn('class="access-logo"', html)
-            self.assertIn('css/login.css?v=4', html)
+            self.assertIn('css/login.css?v=5', html)
             self.assertRegex(html, r'(?s)<link href="[^"]*(inter\.css|family=Inter)[^"]*"')
             self.assertRegex(html, r'(?s)<link href="[^"]*(outfit\.css|family=Outfit)[^"]*"')
 
@@ -278,7 +278,7 @@ class RecuperarContrasenaVistaOficialTests(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, 'recovery-shell')
         self.assertContains(r, 'policy-content')
-        self.assertContains(r, 'css/login.css?v=4')
+        self.assertContains(r, 'css/login.css?v=5')
 
 
 class DisenoOficialCssTests(TestCase):

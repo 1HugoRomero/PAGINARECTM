@@ -24,8 +24,9 @@
     return y;
   }
 
-  function plainLines(title, rows, note) {
-    const lines = ['AgroAsesor · ' + title, ''];
+  function plainLines(title, rows, note, result) {
+    const lines = ['AgroAsesor · ' + title, 'Fecha: ' + new Date().toLocaleString('es-CL'), ''];
+    if (result && result.value) lines.push((result.label || 'Resultado') + ': ' + result.value, '');
     (rows || []).forEach(function (row) {
       if (!row) return;
       if (row.heading) lines.push(row.heading);
@@ -55,7 +56,7 @@
         return false;
       }
       win.document.title = 'AgroAsesor';
-      plainLines(title, rows, note).forEach(function (line) {
+      plainLines(title, rows, note, opts.result).forEach(function (line) {
         const p = win.document.createElement('p');
         p.textContent = line;
         win.document.body.append(p);
@@ -64,7 +65,7 @@
       return false;
     }
     const doc = new JsPdf();
-    doc.setFillColor(35, 93, 55);
+    doc.setFillColor(11, 107, 75);
     doc.rect(0, 0, 210, 22, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(16);
@@ -78,6 +79,24 @@
     let y = 34;
     y = wrap(doc, title, 14, y, 180, 7);
     doc.setFontSize(10);
+    doc.setTextColor(90, 100, 110);
+    y = wrap(doc, 'Fecha: ' + new Date().toLocaleString('es-CL'), 14, y, 180, 6);
+    doc.setTextColor(30, 40, 32);
+    if (opts.result && opts.result.value) {
+      // Resultado principal destacado en un recuadro, igual que en pantalla.
+      y += 2;
+      doc.setFillColor(230, 247, 239);
+      doc.roundedRect(14, y, 182, 20, 3, 3, 'F');
+      doc.setFontSize(9);
+      doc.setTextColor(11, 107, 75);
+      doc.text(String(opts.result.label || 'Resultado').toUpperCase(), 19, y + 7);
+      doc.setFontSize(16);
+      doc.setTextColor(15, 27, 45);
+      doc.text(String(opts.result.value), 19, y + 15);
+      doc.setTextColor(30, 40, 32);
+      doc.setFontSize(10);
+      y += 26;
+    }
     y += 4;
     (rows || []).forEach(function (row) {
       if (!row) return;

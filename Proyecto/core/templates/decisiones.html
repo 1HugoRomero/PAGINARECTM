@@ -2,7 +2,7 @@
 {% load static agro_assets %}
 {% block title %}Centro de decisiones · AgroAsesor{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/decisiones.css' %}?v=15">
+    <link rel="stylesheet" href="{% static 'css/decisiones.css' %}?v=16">
 {% endblock %}
 {% block content %}
     <section class="decision-center"
@@ -78,6 +78,7 @@
                         <div class="example-row" id="calc-example-row"></div>
                     </div>
                     <ol class="calc-steps">
+                        <li class="calc-group"><span class="calc-group-title">Dónde vas a trabajar</span><span class="calc-group-sub">Potrero y cultivo</span></li>
                         <li class="calc-step" data-step="plot">
                             <span class="calc-step-num" aria-hidden="true">1</span>
                             <div class="calc-step-body">
@@ -115,6 +116,7 @@
                                 </label>
                             </div>
                         </li>
+                        <li class="calc-group"><span class="calc-group-title">Cuánto vas a usar</span><span class="calc-group-sub">Superficie, dosis y unidad</span></li>
                         <li class="calc-step" data-step="area">
                             <span class="calc-step-num" aria-hidden="true">3</span>
                             <div class="calc-step-body">
@@ -124,7 +126,7 @@
                                 </div>
                                 <label class="field">
                                     <span>Superficie a calcular (ha)</span>
-                                    <input id="calc-area" type="number" min="0.0001" step="any" required>
+                                    <span class="unit-input"><input id="calc-area" type="number" min="0.0001" step="any" required><em class="unit-tag" aria-hidden="true">ha</em></span>
                                     <small class="help">1 hectárea = 10.000 m²</small>
                                 </label>
                                 <div class="calc-inline-tools" id="calc-area-tools"></div>
@@ -148,7 +150,7 @@
                                 </label>
                                 <label class="field">
                                     <span id="calc-dose-label">Dosis o densidad por hectárea</span>
-                                    <input id="calc-dose" type="number" min="0.001" step="any" required>
+                                    <span class="unit-input"><input id="calc-dose" type="number" min="0.001" step="any" required><em class="unit-tag" id="calc-dose-unit" aria-hidden="true"></em></span>
                                     <small class="help" id="calc-dose-help">Kilos de semilla por cada hectárea.</small>
                                     <span class="calc-dose-origin" id="calc-dose-origin" aria-live="polite"></span>
                                 </label>
@@ -305,6 +307,7 @@
                            aria-live="polite"><span class="calc-status-dot" aria-hidden="true"></span><span class="calc-status-text">Completa los pasos para comprobar</span></p>
                     </div>
                     <ol class="calc-steps">
+                        <li class="calc-group"><span class="calc-group-title">Dónde vas a trabajar</span><span class="calc-group-sub">Potrero y cultivo</span></li>
                         <li class="calc-step" data-step="plot">
                             <span class="calc-step-num" aria-hidden="true">1</span>
                             <div class="calc-step-body">
@@ -340,6 +343,7 @@
                                 </label>
                             </div>
                         </li>
+                        <li class="calc-group"><span class="calc-group-title">Qué tienes y cuánto necesitas</span><span class="calc-group-sub">Producto, cantidad disponible, dosis y superficie</span></li>
                         <li class="calc-step" data-step="product">
                             <span class="calc-step-num" aria-hidden="true">3</span>
                             <div class="calc-step-body">
@@ -365,11 +369,11 @@
                                 </div>
                                 <div class="calc-row">
                                     <label class="field">
-                                        <span>Cantidad disponible</span><input name="stock"
+                                        <span>Cantidad disponible</span><span class="unit-input"><input name="stock"
        type="number"
        min="0"
        step="any"
-       required>
+       required><em class="unit-tag" data-unit-tag="stock" aria-hidden="true"></em></span>
                                     </label>
                                     <label class="field">
                                         <span>Unidad</span><select name="unit">
@@ -392,19 +396,19 @@
                                 </div>
                                 <div class="calc-row">
                                     <label class="field">
-                                        <span>Dosis o requerimiento por ha</span><input name="dose"
+                                        <span>Dosis o requerimiento por ha</span><span class="unit-input"><input name="dose"
        type="number"
        min="0.001"
        step="any"
-       required>
+       required><em class="unit-tag" data-unit-tag="dose" aria-hidden="true"></em></span>
                                         <small class="help" data-role="dose-help"></small>
                                     </label>
                                     <label class="field">
-                                        <span>Superficie a cubrir (ha)</span><input name="area"
+                                        <span>Superficie a cubrir (ha)</span><span class="unit-input"><input name="area"
        type="number"
        min="0.0001"
        step="any"
-       required>
+       required><em class="unit-tag" aria-hidden="true">ha</em></span>
                                     </label>
                                 </div>
                                 <div class="calc-inline-tools" data-flow-area-tools></div>
@@ -448,9 +452,9 @@
 {% block extra_js %}
     <script src="{% vendor 'jspdf.umd.min.js' 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js' %}"
             defer></script>
-    <script src="{% static 'js/agro-pdf.js' %}?v=1" defer></script>
-    <script src="{% static 'js/calc-panel.js' %}?v=10" defer></script>
+    <script src="{% static 'js/agro-pdf.js' %}?v=2" defer></script>
+    <script src="{% static 'js/calc-panel.js' %}?v=11" defer></script>
     <script src="{% static 'js/calc-flow.js' %}?v=5" defer></script>
     <script src="{% static 'js/tool-flow.js' %}?v=5" defer></script>
-    <script src="{% static 'js/decisiones.js' %}?v=10" defer></script>
+    <script src="{% static 'js/decisiones.js' %}?v=11" defer></script>
 {% endblock %}
