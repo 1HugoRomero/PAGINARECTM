@@ -15,6 +15,10 @@ services:
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost}
       # GitHub Codespaces define CODESPACES=true; así Django acepta la dirección *.app.github.dev.
       CODESPACES: ${CODESPACES:-}
+      # Inicio de sesión con Google (opcional): se leen del .env, nunca se escriben aquí.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
       DJANGO_DB_PATH: /data/db.sqlite3
       DATABASE_URL: ${DATABASE_URL:?Falta DATABASE_URL en el archivo .env}
       DJANGO_BACKUP_DIR: /backups

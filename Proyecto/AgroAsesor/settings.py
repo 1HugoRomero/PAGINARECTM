@@ -57,6 +57,11 @@ LOGIN_URL = 'login'
 CSRF_FAILURE_VIEW = 'core.auth.fallo_csrf'
 LOGIN_REDIRECT_URL = 'dashboard'
 AUTHENTICATION_BACKENDS = ['core.auth.EmailBackend']
+# Inicio de sesión con Google (OAuth 2.0). Las credenciales se leen SOLO de variables de entorno (.env no versionado).
+# Sin ellas el botón «Continuar con Google» no aparece. Ver .env.example y el README.
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '').strip()
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '').strip()
+GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI', '').strip()  # opcional: fija la URL de retorno
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = not DEBUG

@@ -1,0 +1,9 @@
+<div class="policy-consent">
+    <label for="{{ campo.id_for_label }}">
+        {{ campo }}
+        <span>He leído y acepto la <a href="{% url 'politica_privacidad' %}"
+    target="_blank"
+    rel="noopener">Política de privacidad, seguridad y cookies</a>.</span>
+    </label>
+    {{ campo.errors }}
+</div>
