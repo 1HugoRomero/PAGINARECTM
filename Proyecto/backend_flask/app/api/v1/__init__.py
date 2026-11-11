@@ -17,6 +17,7 @@ from app.api.v1 import (
     reportes,
     admin,
     catalogo,
+    fertilizantes,
 )
 
 
@@ -38,5 +39,6 @@ def register_v1_blueprints(app):
         reportes,
         admin,
         catalogo,
+        fertilizantes,
     ):
         app.register_blueprint(module.bp, url_prefix="/api/v1")

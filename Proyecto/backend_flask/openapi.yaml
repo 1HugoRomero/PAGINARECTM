@@ -1004,6 +1004,184 @@ paths:
           description: Datos inválidos
         '415':
           description: Se requiere JSON
+  /catalogo/fertilizantes/resumen:
+    get:
+      tags:
+      - Fertilizantes
+      summary: Versión, fuentes, nutrientes y grupos del catálogo de fertilizantes
+      responses:
+        '200':
+          description: Resumen del catálogo
+  /catalogo/fertilizantes:
+    get:
+      tags:
+      - Fertilizantes
+      summary: Fertilizantes con composición de referencia (FAO/IFA 2002) y ubicación en la fuente
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+          maxLength: 100
+      - in: query
+        name: nutriente
+        schema:
+          type: string
+          enum: [N, P2O5, K2O, Mg, S]
+      - in: query
+        name: grupo
+        schema:
+          type: string
+          enum: [nitrogenados, fosfatados, potasicos, magnesio, azufrados, multinutrientes]
+      responses:
+        '200':
+          description: Lista con composición, fuente y estado de verificación
+        '400':
+          description: Filtro inválido
+  /catalogo/fertilizantes/{fert_id}:
+    get:
+      tags:
+      - Fertilizantes
+      summary: Ficha de un fertilizante
+      parameters:
+      - in: path
+        name: fert_id
+        required: true
+        schema:
+          type: string
+          example: urea
+      responses:
+        '200':
+          description: Ficha con composición y fuente
+        '404':
+          description: No encontrado
+  /catalogo/calcular-fertilizante:
+    post:
+      tags:
+      - Fertilizantes
+      summary: Kilos de producto para aportar el requerimiento de nutriente indicado por el usuario
+      description: No recomienda dosis. Si la fuente da un rango de ley, se debe indicar la ley declarada en la etiqueta.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - fertilizante_id
+              - nutriente
+              - requerimiento_kg_ha
+              properties:
+                fertilizante_id:
+                  type: string
+                  example: superfosfato-triple
+                nutriente:
+                  type: string
+                  enum: [N, P2O5, K2O, Mg, S]
+                  example: P2O5
+                requerimiento_kg_ha:
+                  type: number
+                  exclusiveMinimum: 0
+                  maximum: 2000
+                  example: 92
+                superficie_ha:
+                  type: number
+                  exclusiveMinimum: 0
+                  example: 1.5
+                superficie_m2:
+                  type: number
+                  exclusiveMinimum: 0
+                ley_declarada_pct:
+                  type: number
+                  exclusiveMinimum: 0
+                  maximum: 100
+                  description: Porcentaje del nutriente que declara la etiqueta
+                peso_saco_kg:
+                  type: number
+                  exclusiveMinimum: 0
+                  example: 25
+              additionalProperties: false
+      responses:
+        '200':
+          description: Producto por hectárea, total, aportes de otros nutrientes y sacos
+        '400':
+          description: Datos inválidos
+        '415':
+          description: Se requiere JSON
+  /catalogo/conversiones:
+    get:
+      tags:
+      - Fertilizantes
+      summary: Factores de conversión P2O5↔P y K2O↔K (FAO/IFA 2002, p. 77)
+      responses:
+        '200':
+          description: Factores con fuente
+  /catalogo/convertir:
+    get:
+      tags:
+      - Fertilizantes
+      summary: Convierte un valor entre P2O5 y P o entre K2O y K
+      parameters:
+      - in: query
+        name: de
+        required: true
+        schema:
+          type: string
+          enum: [P2O5, P, K2O, K]
+      - in: query
+        name: a
+        required: true
+        schema:
+          type: string
+          enum: [P2O5, P, K2O, K]
+      - in: query
+        name: valor
+        required: true
+        schema:
+          type: number
+          minimum: 0
+      responses:
+        '200':
+          description: Resultado de la conversión
+        '400':
+          description: Conversión o valor inválido
+  /catalogo/normativa/contenidos-minimos:
+    get:
+      tags:
+      - Fertilizantes
+      summary: Contenidos mínimos de nutrientes para fertilizantes inorgánicos (Res. SAG 8.651 exenta de 2024)
+      responses:
+        '200':
+          description: Mínimos por tipo de fertilizante con fuente
+  /catalogo/revisar-etiqueta:
+    post:
+      tags:
+      - Fertilizantes
+      summary: Compara los nutrientes declarados en una etiqueta con los mínimos de la Res. SAG 8.651/2024
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Porcentajes declarados, expresados como en la norma
+              properties:
+                N: {type: number}
+                P2O5: {type: number}
+                K2O: {type: number}
+                MgO: {type: number}
+                CaO: {type: number}
+                SO3: {type: number}
+                Na2O: {type: number}
+              additionalProperties: false
+              example: {N: 46}
+      responses:
+        '200':
+          description: Cumple o no cada mínimo
+        '400':
+          description: Datos inválidos
+        '415':
+          description: Se requiere JSON
   /calculos:
     get:
       tags:
@@ -1096,3 +1274,5 @@ tags:
   description: Lectura desde la base oficial (solo lectura).
 - name: Catálogo
   description: Fuentes SAG, INIA, ODEPA y cálculos logísticos de semillas
+- name: Fertilizantes
+  description: Catálogo de fertilizantes con fuente oficial, cálculo de producto, conversiones y normativa SAG
