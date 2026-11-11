@@ -180,8 +180,7 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'AgroAsesor <noreply@localh
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# API Flask (servicio interno de solo lectura detrás de Django). Opcional: sin estas variables, /api/v1/ responde 503
-# y el resto de AgroAsesor funciona igual. La clave debe tener al menos 32 caracteres y NO se guarda en el código.
+#
 AGROASESOR_API_URL = os.getenv('AGROASESOR_API_URL', '').rstrip('/')
 AGROASESOR_INTERNAL_SECRET = os.getenv('AGROASESOR_INTERNAL_SECRET', '')
 AGROASESOR_API_TIMEOUT = float(os.getenv('AGROASESOR_API_TIMEOUT', '10'))
