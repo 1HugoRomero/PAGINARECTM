@@ -73,12 +73,13 @@
         .fert { padding: 16px; }
         .fert h3 { margin: 0; color: var(--ink); font-size: 1.02rem; font-weight: 600; }
         .fert .f { color: var(--muted); font-size: .82rem; font-family: ui-monospace, Consolas, monospace; }
-        .grade { margin: 10px 0 8px; color: var(--green); font-size: 1.3rem; font-weight: 700; letter-spacing: -.01em; }
+        .grade { margin: 10px 0 8px; color: var(--green); font-size: 1rem; font-weight: 600; }
         .bars { display: grid; gap: 6px; }
-        .bar { display: grid; grid-template-columns: 44px 1fr 62px; align-items: center; gap: 8px; font-size: .78rem; }
+        .bar { display: grid; grid-template-columns: 40px 1fr 78px; align-items: center; gap: 8px; font-size: .78rem; }
         .bar .t { height: 8px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
         .bar .t span { display: block; height: 100%; border-radius: inherit; background: var(--green); }
         .bar b { text-align: right; color: var(--ink); font-weight: 600; }
+        .bar.is-na span:first-child, .bar.is-na b { color: #94a3b8; font-weight: 400; }
         .tag { display: inline-block; margin-top: 10px; padding: 3px 9px; border-radius: 999px; font-size: .72rem; font-weight: 600; }
         .tag.ok { background: var(--mint); color: var(--green); } .tag.warn { background: var(--amber-bg); color: var(--amber); }
         .src { display: block; margin-top: 6px; color: var(--muted); font-size: .76rem; }
@@ -122,7 +123,7 @@
     <section class="section" id="fertilizantes">
         <span class="kicker">Datos servidos por la API</span>
         <h2>Fertilizantes y su composición</h2>
-        <p>Grado de referencia en % de N, P₂O₅ y K₂O, con la fuente y su estado de verificación.</p>
+        <p>Composición <b>referencial</b> en % de N, P₂O₅, K₂O, MgO y S, por separado. «no inf.» = la fuente no lo informa (no es 0). * MgO calculado desde el Mg que informa la fuente. Para tu producto vale lo que declara su etiqueta.</p>
         <div class="filters" id="f-filters"></div>
         <div class="ferts" id="f-grid"></div>
     </section>
@@ -141,15 +142,15 @@ const make = (tag, text, cls) => { const n = document.createElement(tag); if (te
 // Endpoints que se pueden probar desde la consola (solo los públicos: no requieren sesión).
 const ENDPOINTS = [
   { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/fertilizantes', s: 'Lista de fertilizantes con composición y fuente',
-    q: [{ n: 'nutriente', o: ['', 'N', 'P2O5', 'K2O', 'Mg', 'S'] }, { n: 'grupo', o: ['', 'nitrogenados', 'fosfatados', 'potasicos', 'magnesio', 'azufrados', 'multinutrientes'] }, { n: 'q', v: '' }] },
-  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/fertilizantes/{id}', s: 'Ficha de un fertilizante', path: { id: 'superfosfato-triple' } },
+    q: [{ n: 'nutriente', o: ['', 'N', 'P2O5', 'K2O', 'MgO', 'S'] }, { n: 'grupo', o: ['', 'nitrogenados', 'fosfatados', 'potasicos', 'magnesio', 'azufrados', 'multinutrientes'] }, { n: 'q', v: '' }] },
+  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/fertilizantes/{id}', s: 'Ficha de un fertilizante', path: { id: 'superfosfato-simple' } },
   { g: 'Fertilizantes', m: 'POST', p: '/api/v1/catalogo/calcular-fertilizante', s: 'Kilos de producto para cubrir un requerimiento de nutriente',
-    body: { fertilizante_id: 'superfosfato-triple', nutriente: 'P2O5', requerimiento_kg_ha: 92, superficie_ha: 2.5, peso_saco_kg: 25 } },
+    body: { fertilizante_id: 'urea', nutriente: 'N', requerimiento_kg_ha: 92, superficie_ha: 2.5, ley_declarada_pct: 46, peso_saco_kg: 25 } },
   { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/convertir', s: 'Convierte P₂O₅↔P o K₂O↔K (factores FAO)',
     q: [{ n: 'de', o: ['P2O5', 'P', 'K2O', 'K'] }, { n: 'a', o: ['P', 'P2O5', 'K', 'K2O'] }, { n: 'valor', v: '46' }] },
   { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/conversiones', s: 'Factores de conversión con su fuente' },
-  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/normativa/contenidos-minimos', s: 'Contenidos mínimos de nutrientes (Res. SAG 8.651/2024)' },
-  { g: 'Fertilizantes', m: 'POST', p: '/api/v1/catalogo/revisar-etiqueta', s: 'Revisa una etiqueta contra los mínimos SAG', body: { N: 15, P2O5: 15, K2O: 15 } },
+  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/normativa/contenidos-minimos', s: 'Categorías, mínimos y requisitos (Res. SAG 8.651/2024)' },
+  { g: 'Fertilizantes', m: 'POST', p: '/api/v1/catalogo/revisar-etiqueta', s: 'Revisa los contenidos mínimos de una etiqueta (Res. SAG 8.651)', body: { categoria: 'mezcla', nutrientes: { N: 15, P2O5: 15, K2O: 15 }, contiene_urea: true, biuret_pct: 0.9 } },
   { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/fertilizantes/resumen', s: 'Fuentes, nutrientes y grupos del catálogo' },
   { g: 'Catálogo agrícola', m: 'GET', p: '/api/v1/catalogo/productos', s: 'Insumos con fuentes SAG/INIA/ODEPA', q: [{ n: 'categoria', o: ['', 'semillas', 'fertilizantes', 'fungicidas', 'insecticidas', 'herbicidas', 'repelentes'] }, { n: 'q', v: '' }] },
   { g: 'Catálogo agrícola', m: 'GET', p: '/api/v1/catalogo/referencias-siembra', s: 'Rangos de siembra documentados por INIA' },
@@ -255,11 +256,13 @@ function renderFerts(grupo) {
   const grid = $('f-grid'); grid.replaceChildren();
   for (const f of allFerts.filter((x) => !grupo || x.grupo === grupo)) {
     const c = make('article', null, 'card fert');
-    c.append(make('h3', f.nombre), make('div', f.formula || '—', 'f'), make('div', f.grado_npk.replaceAll(' / ', '-'), 'grade'));
+    c.append(make('h3', f.nombre), make('div', f.formula || 'Fórmula no indicada en la fuente', 'f'), make('div', f.grado.texto, 'grade'));
     const bars = make('div', null, 'bars');
-    for (const [k, v] of Object.entries(f.composicion)) {
-      const row = make('div', null, 'bar'); const t = make('div', null, 't'); const s = make('span'); s.style.width = v.max_pct + '%'; t.append(s);
-      row.append(make('span', k), t, make('b', v.es_rango ? fmt(v.min_pct) + '–' + fmt(v.max_pct) + ' %' : fmt(v.min_pct) + ' %'));
+    for (const [k, v] of Object.entries(f.composicion_referencial)) {
+      const row = make('div', null, 'bar' + (v.informado_en_fuente ? '' : ' is-na')); const t = make('div', null, 't'); const s = make('span');
+      s.style.width = (v.informado_en_fuente ? v.max_pct : 0) + '%'; t.append(s);
+      row.append(make('span', k), t, make('b', v.informado_en_fuente ? v.texto + (v.origen === 'calculado' ? '*' : '') : 'no inf.'));
+      if (v.origen === 'calculado') row.title = v.calculo + ' (la fuente da Mg ' + v.valor_en_fuente.Mg_pct + ' %)';
       bars.append(row);
     }
     c.append(bars);

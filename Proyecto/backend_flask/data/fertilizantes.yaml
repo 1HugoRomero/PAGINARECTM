@@ -1,11 +1,12 @@
-# AgroAsesor: composición de referencia de fertilizantes.
-# Cada valor se transcribió de la fuente indicada (cuadro y página) y se revisó contra el documento el 2026-11-11.
-# No contiene marcas, precios, envases ni dosis recomendadas: la dosis depende del análisis de suelo y de la asesoría técnica.
-version: 0.1.0
+# AgroAsesor: composición REFERENCIAL de fertilizantes y normativa SAG de contenidos mínimos.
+# Cada valor se transcribió de la fuente indicada (cuadro y página) y se revisó de nuevo contra el documento el
+# 2026-11-11 (auditoría). No contiene marcas, precios, envases ni dosis recomendadas.
+version: 0.2.0
 fecha_consulta: '2026-11-11'
 aviso_general: >-
-  Composición de referencia (grado típico) publicada por FAO/IFA. El contenido real de un producto es el que declara
-  su etiqueta; el fabricante lo garantiza dentro de límites de tolerancia. No es una recomendación de fertilización.
+  Composición referencial (grado típico) publicada por FAO/IFA. El contenido que vale para un producto concreto es el
+  que declara su etiqueta; el fabricante lo garantiza dentro de límites de tolerancia. No es una recomendación de
+  fertilización.
 
 fuentes:
   - id: fao_ifa_2002
@@ -20,189 +21,192 @@ fuentes:
     url: https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/18/44027/01/2585124.pdf
     tipo: normativa
 
-# Nutrientes tal como los expresa la fuente FAO/IFA (columnas del Cuadro 2): N, P2O5, K2O, Mg y S, en % del producto.
+# Columnas del Cuadro 2 de FAO/IFA (p. 38): N, P2O5, K2O, Mg y S, en % del producto.
+# OJO: la fuente expresa el magnesio como Mg elemental (encabezado «Mg»); la API además informa MgO calculado.
 nutrientes:
-  - id: N
-    nombre: Nitrógeno
-  - id: P2O5
-    nombre: Fósforo (como P2O5)
-  - id: K2O
-    nombre: Potasio (como K2O)
-  - id: Mg
-    nombre: Magnesio
-  - id: S
-    nombre: Azufre
+  - {id: N, nombre: Nitrógeno}
+  - {id: P2O5, nombre: Fósforo expresado como P2O5}
+  - {id: K2O, nombre: Potasio expresado como K2O}
+  - {id: MgO, nombre: Magnesio expresado como MgO (calculado desde el Mg de la fuente)}
+  - {id: S, nombre: Azufre}
+
+# Conversión Mg -> MgO por masas molares (IUPAC: Mg 24,305; O 15,999): 40,304 / 24,305 = 1,6583.
+# No figura en la guía FAO/IFA; se usa solo para expresar en MgO lo que la fuente da como Mg.
+factor_mg_a_mgo: 1.6583
 
 grupos:
-  - id: nitrogenados
-    nombre: Fertilizantes nitrogenados
-  - id: fosfatados
-    nombre: Fertilizantes fosfatados
-  - id: potasicos
-    nombre: Fertilizantes potásicos
-  - id: magnesio
-    nombre: Fertilizantes de magnesio
-  - id: azufrados
-    nombre: Fertilizantes azufrados
-  - id: multinutrientes
-    nombre: Fertilizantes multinutrientes
+  - {id: nitrogenados, nombre: Fertilizantes nitrogenados}
+  - {id: fosfatados, nombre: Fertilizantes fosfatados}
+  - {id: potasicos, nombre: Fertilizantes potásicos}
+  - {id: magnesio, nombre: Fertilizantes de magnesio}
+  - {id: azufrados, nombre: Fertilizantes azufrados}
+  - {id: multinutrientes, nombre: Fertilizantes multinutrientes}
 
-# Valores: número fijo o [mínimo, máximo] cuando la fuente da un rango.
-# estado_verificacion: cotejada_con_fuente = leído en el documento; citada_sin_cotejar = la fila no se pudo leer sin ambigüedad.
+# columnas_fuente: exactamente lo impreso en la fuente, columna por columna.
+#   número      -> valor único (0 incluido: la fuente imprime 0)
+#   [mín, máx]  -> rango impreso (p. ej. «16-20»)
+#   null        -> la fuente imprime «-» o no tiene esa columna: NO se informa (no es lo mismo que 0)
+# formula_fuente: fórmula tal como la imprime la fuente; null si la fuente no la da.
 fertilizantes:
   - id: urea
     nombre: Urea
-    formula: CO(NH2)2
+    formula_fuente: CO(NH2)2
     grupo: nitrogenados
-    nutrientes: {N: [45, 46]}
+    columnas_fuente: {N: [45, 46], P2O5: 0, K2O: 0, Mg: null, S: null}
     fuente_id: fao_ifa_2002
-    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    ubicacion: Cuadro 2, p. 38 (algunos fertilizantes de importancia regional)
     estado_verificacion: cotejada_con_fuente
   - id: sulfato-amonico
     nombre: Sulfato amónico
-    formula: (NH4)2SO4
+    formula_fuente: (NH4)2SO4
     grupo: nitrogenados
-    nutrientes: {N: 21, S: 23}
+    columnas_fuente: {N: 21, P2O5: 0, K2O: 0, Mg: null, S: 23}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
   - id: nitrato-amonico
     nombre: Nitrato amónico
-    formula: NH4NO3
+    formula_fuente: NH4NO3
     grupo: nitrogenados
-    nutrientes: {N: [33, 34.5]}
+    columnas_fuente: {N: [33, 34.5], P2O5: 0, K2O: 0, Mg: null, S: null}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
   - id: nitrato-amonico-calcico
     nombre: Nitrato amónico-cálcico (nitrato amónico-cal)
-    formula: NH4NO3 + CaCO3
+    formula_fuente: NH4NO3 + CaCO3
     grupo: nitrogenados
-    nutrientes: {N: [20.5, 26]}
+    columnas_fuente: {N: [20.5, 26], P2O5: 0, K2O: 0, Mg: null, S: null}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
   - id: nitrato-sodico
     nombre: Nitrato sódico (salitre sódico)
-    formula: NaNO3
+    formula_fuente: NaNO3
     grupo: nitrogenados
-    nutrientes: {N: 16}
+    columnas_fuente: {N: 16, P2O5: 0, K2O: 0, Mg: null, S: null}
     fuente_id: fao_ifa_2002
-    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    ubicacion: Cuadro 2, p. 38 (algunos fertilizantes de importancia regional)
     estado_verificacion: cotejada_con_fuente
   - id: nitrosulfato-amonico
     nombre: Nitrosulfato amónico
-    formula: NH4NO3·(NH4)2SO4
+    formula_fuente: NH4NO3·(NH4)2SO4
     grupo: nitrogenados
-    nutrientes: {N: 26, S: 15}
+    columnas_fuente: {N: 26, P2O5: 0, K2O: 0, Mg: null, S: 15}
     fuente_id: fao_ifa_2002
-    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    ubicacion: Cuadro 2, p. 38 (algunos fertilizantes de importancia regional)
     estado_verificacion: cotejada_con_fuente
   - id: superfosfato-simple
     nombre: Superfosfato simple
-    formula: Ca(H2PO4)2 + CaSO4
+    formula_fuente: Ca(H2PO4)2 + CaSO4
     grupo: fosfatados
-    nutrientes: {P2O5: [16, 20], S: 12}
+    columnas_fuente: {N: 0, P2O5: [16, 20], K2O: 0, Mg: null, S: 12}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
   - id: superfosfato-triple
     nombre: Superfosfato triple (concentrado)
-    formula: Ca(H2PO4)2
+    formula_fuente: Ca(H2PO4)2
     grupo: fosfatados
-    nutrientes: {P2O5: 46}
+    columnas_fuente: {N: 0, P2O5: 46, K2O: 0, Mg: null, S: null}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
   - id: fosfato-roca
     nombre: Fosfato de roca molido (fosfato mineral)
-    formula: null
+    formula_fuente: null
     grupo: fosfatados
-    nutrientes: {P2O5: [20, 40]}
+    columnas_fuente: {N: 0, P2O5: [20, 40], K2O: 0, Mg: null, S: null}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
   - id: fosfato-dicalcico
     nombre: Fosfato dicálcico
-    formula: CaHPO4
+    formula_fuente: Ca(HPO4)
     grupo: fosfatados
-    nutrientes: {P2O5: [35, 42]}
+    columnas_fuente: {N: 0, P2O5: [35, 42], K2O: 0, Mg: null, S: null}
     fuente_id: fao_ifa_2002
-    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    ubicacion: Cuadro 2, p. 38 (algunos fertilizantes de importancia regional)
     estado_verificacion: cotejada_con_fuente
   - id: escoria-thomas
     nombre: Escoria Thomas
-    formula: null
+    formula_fuente: null
     grupo: fosfatados
-    nutrientes: {P2O5: [16, 20], Mg: [1, 3]}
+    columnas_fuente: {N: 0, P2O5: [16, 20], K2O: 0, Mg: [1, 3], S: null}
     fuente_id: fao_ifa_2002
-    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    ubicacion: Cuadro 2, p. 38 (algunos fertilizantes de importancia regional)
     estado_verificacion: cotejada_con_fuente
   - id: cloruro-potasico
     nombre: Muriato o cloruro potásico
-    formula: KCl
+    formula_fuente: KCl
     grupo: potasicos
-    nutrientes: {K2O: 60}
+    columnas_fuente: {N: 0, P2O5: 0, K2O: 60, Mg: null, S: null}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
   - id: sulfato-potasico
     nombre: Sulfato potásico
-    formula: K2SO4
+    formula_fuente: K2SO4
     grupo: potasicos
-    nutrientes: {K2O: 50, S: 18}
+    columnas_fuente: {N: 0, P2O5: 0, K2O: 50, Mg: null, S: 18}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
   - id: sulfato-potasico-magnesico
     nombre: Sulfato potásico-magnésico
-    formula: K2SO4·2MgSO4
+    formula_fuente: K2SO4·2MgSO4
     grupo: potasicos
-    nutrientes: {K2O: [26, 30], Mg: [5, 7], S: [16, 22]}
+    columnas_fuente: {N: 0, P2O5: 0, K2O: [26, 30], Mg: [5, 7], S: [16, 22]}
     fuente_id: fao_ifa_2002
-    ubicacion: Cuadro 2, p. 38 (fertilizantes de importancia regional)
+    ubicacion: Cuadro 2, p. 38 (algunos fertilizantes de importancia regional)
     estado_verificacion: cotejada_con_fuente
   - id: kieserita
     nombre: Kieserita
-    formula: MgSO4·7H2O
+    formula_fuente: MgSO4·7H2O
     grupo: magnesio
-    nutrientes: {Mg: 16, S: 22}
+    columnas_fuente: {N: null, P2O5: null, K2O: null, Mg: 16, S: 22}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
+    nota: >-
+      Valores transcritos de la fuente. La fórmula impresa (MgSO4·7H2O) es la de la sal heptahidratada (sal de Epsom),
+      mientras que la kieserita mineral es MgSO4·H2O: se conserva tal cual y se recomienda confirmar con la etiqueta.
   - id: kieserita-calcinada
     nombre: Kieserita calcinada
-    formula: MgSO4·H2O
+    formula_fuente: MgSO4·H2O
     grupo: magnesio
-    nutrientes: {Mg: 20, S: 27}
+    columnas_fuente: {N: null, P2O5: null, K2O: null, Mg: 20, S: 27}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 2, p. 38
     estado_verificacion: cotejada_con_fuente
+    nota: Fórmula transcrita tal como la imprime la fuente; confirmar la composición con la etiqueta.
   - id: yeso
     nombre: Yeso
-    formula: CaSO4·2H2O
+    formula_fuente: CaSO4·2H2O
     grupo: azufrados
-    nutrientes: {S: [16, 18]}
+    columnas_fuente: {N: null, P2O5: null, K2O: null, Mg: null, S: [16, 18]}
     fuente_id: fao_ifa_2002
-    ubicacion: Texto del capítulo, p. 39 («el azufre es también contenido en el yeso (16-18 por ciento de S)»)
+    ubicacion: Cuadro 2, p. 38 (fórmula; S «según fórmula») y texto de la p. 39 («16-18 por ciento de S»)
     estado_verificacion: cotejada_con_fuente
   - id: fosfato-diamonico
     nombre: Fosfato diamónico (DAP)
-    formula: (NH4)2HPO4
+    formula_fuente: null
     grupo: multinutrientes
-    nutrientes: {N: [16, 18], P2O5: [42, 48]}
+    columnas_fuente: {N: [16, 18], P2O5: [42, 48], K2O: null, Mg: null, S: null}
     fuente_id: fao_ifa_2002
-    ubicacion: Cuadro 3, p. 39 (rango); el texto de la p. 45 usa 18 % N y 46 % P2O5
+    ubicacion: Cuadro 3, p. 39 (rango); el ejemplo de la p. 45 usa 18 % de N y 46 % de P2O5
     estado_verificacion: cotejada_con_fuente
   - id: fosfato-monoamonico
     nombre: Fosfato monoamónico (MAP)
-    formula: NH4H2PO4
+    formula_fuente: null
     grupo: multinutrientes
-    nutrientes: {N: 11, P2O5: 52}
+    columnas_fuente: {N: 11, P2O5: 52, K2O: null, Mg: null, S: null}
     fuente_id: fao_ifa_2002
     ubicacion: Cuadro 3, p. 39
     estado_verificacion: citada_sin_cotejar
-    nota: La fila del Cuadro 3 aparece desalineada en la versión digital; confirmar con la etiqueta del producto.
+    nota: >-
+      En la versión digital del Cuadro 3 las filas de DAP y MAP aparecen en un mismo bloque; los valores de MAP se
+      asignaron por el orden de las columnas. Confirmar con la etiqueta del producto.
 
 # Anexo «Factores de conversión», p. 77 de la misma guía FAO/IFA.
 conversiones:
@@ -214,17 +218,89 @@ conversiones:
     - {de: K2O, a: K, factor: 0.8302}
     - {de: K, a: K2O, factor: 1.2046}
 
-# Resolución SAG N° 8.651 exenta (2024), numeral 3.1.2, Grupo 2: fertilizantes inorgánicos, A. Contenidos mínimos.
-# Los nutrientes se expresan como óxidos (MgO, CaO, SO3, Na2O), no como Mg o S elementales.
-normativa_contenidos_minimos:
+# Resolución SAG N° 8.651 exenta (2024). Los nutrientes se expresan como en la norma (MgO, CaO, SO3, Na2O).
+# Los valores numéricos de los Cuadros N° 1 a 11 (micronutrientes, Cu/Zn, metales y patógenos) NO están en la
+# versión de texto del Diario Oficial que se pudo leer: la API los identifica pero no inventa sus límites.
+normativa_sag_8651:
   fuente_id: sag_res_8651_2024
-  ubicacion: Numeral 3.1.2, Grupo 2 (fertilizantes inorgánicos), letra A
   vigencia: >-
-    El numeral 5 del Resuelvo indica que los fertilizantes y bioestimulantes deben cumplir las exigencias del decreto
-    N° 61 a partir de la entrada en vigencia de ese decreto.
-  un_macronutriente:
-    descripcion: Fertilizantes compuestos exclusivamente por un macronutriente (numeral i).
-    minimos_pct: {N: 5, P2O5: 5, K2O: 3, MgO: 2, CaO: 6, SO3: 5, Na2O: 1}
-  varios_macronutrientes:
-    descripcion: Fertilizantes con dos o más macronutrientes (numeral ii).
-    minimos_pct: {N: 1.5, P2O5: 1.5, K2O: 1.5, MgO: 0.5, CaO: 0.5, SO3: 0.5, Na2O: 0.5}
+    Numeral 5 del Resuelvo: los fertilizantes y bioestimulantes deben cumplir las exigencias del decreto N° 61 (2023)
+    y sus resoluciones complementarias a partir de la entrada en vigencia de ese decreto.
+  biuret_maximo_pct: 1.2
+  biuret_ubicacion: 3.1.2 B.v, 3.1.3 B.v, 3.1.5 B.iv y 3.3 B.ii (productos que contienen urea)
+  categorias:
+    - id: organico
+      nombre: Grupo 1 · Fertilizantes orgánicos
+      ubicacion: Numeral 3.1.1
+      regla: al_menos_uno
+      minimos_primarios_pct: {N: 1, P2O5: 1, K2O: 1}
+      minimos_otros_pct: {carbono_organico: 5}
+      contaminantes_a_declarar: [cadmio, arsénico, plomo, mercurio, cromo hexavalente, níquel, coliformes fecales, huevos de helmintos]
+      limites_en_cuadros: [Cuadro N° 2 (Cu y Zn), Cuadro N° 3 (Cu y Zn en guano estabilizado), Cuadro N° 4 (ausencia de E. coli y Salmonella spp.), Cuadro N° 5 (coliformes fecales y huevos de helmintos, si usa subproductos animales)]
+      requisitos_especiales: [Declarar ausencia de E. coli y Salmonella spp.]
+      usa_biuret: false
+    - id: inorganico
+      nombre: Grupo 2 · Fertilizantes inorgánicos
+      ubicacion: Numeral 3.1.2
+      regla: subgrupo_por_cantidad
+      un_macronutriente_pct: {N: 5, P2O5: 5, K2O: 3, MgO: 2, CaO: 6, SO3: 5, Na2O: 1}
+      varios_macronutrientes_pct: {N: 1.5, P2O5: 1.5, K2O: 1.5, MgO: 0.5, CaO: 0.5, SO3: 0.5, Na2O: 0.5}
+      contaminantes_a_declarar: [cadmio, arsénico, plomo, mercurio, cromo hexavalente, níquel, biuret (si contiene urea)]
+      limites_en_cuadros: [Cuadro N° 1 (micronutrientes), Cuadro N° 6 (contaminantes y Cu/Zn)]
+      requisitos_especiales: ['Los límites de Cu y Zn no aplican si se agregan intencionalmente para corregir una deficiencia y así se indica en la etiqueta', Biuret máximo 1,2 % si contiene urea]
+      usa_biuret: true
+    - id: organo_mineral
+      nombre: Grupo 3 · Fertilizantes órgano-minerales
+      ubicacion: Numeral 3.1.3
+      regla: al_menos_uno
+      minimos_primarios_pct: {N: 2, P2O5: 2, K2O: 2}
+      minimos_otros_pct: {carbono_organico: 3}
+      contaminantes_a_declarar: [cadmio, arsénico, plomo, mercurio, cromo hexavalente, níquel, biuret (si contiene urea)]
+      limites_en_cuadros: [Cuadro N° 4 (ausencia de E. coli y Salmonella spp.), Cuadro N° 7 (contaminantes y Cu/Zn)]
+      requisitos_especiales: [Declarar ausencia de E. coli y Salmonella spp., Biuret máximo 1,2 % si contiene urea]
+      usa_biuret: true
+    - id: enmienda_organica
+      nombre: Grupo 4 · Enmienda orgánica
+      ubicacion: Numeral 3.1.4, subgrupo a
+      regla: todos
+      minimos_otros_pct: {carbono_organico: 5, materia_seca_solidos: 20}
+      contaminantes_a_declarar: [cadmio, arsénico, plomo, mercurio, cromo hexavalente, níquel]
+      limites_en_cuadros: [Cuadro N° 4 (E. coli y Salmonella spp.), Cuadro N° 5 (si usa subproductos animales), Cuadro N° 8 (contaminantes y Cu/Zn), Cuadro N° 9 (guano como enmienda)]
+      requisitos_especiales: [La materia seca mínima (20 %) se exige solo a enmiendas sólidas]
+      usa_biuret: false
+    - id: enmienda_inorganica
+      nombre: Grupo 4 · Enmienda inorgánica
+      ubicacion: Numeral 3.1.4, subgrupo b
+      regla: al_menos_uno
+      minimos_primarios_pct: {CaO: 5, MgO: 5}
+      contaminantes_a_declarar: [cadmio, arsénico, plomo, mercurio, cromo hexavalente, níquel]
+      limites_en_cuadros: [Cuadro N° 8 (contaminantes y Cu/Zn)]
+      requisitos_especiales: ['Enmienda calcárea: granulometría de al menos 70 % < 1 mm (excepto cal viva, caliza granulada, tiza y enmiendas líquidas)']
+      usa_biuret: false
+    - id: sustrato_enriquecido
+      nombre: Grupo 5 · Sustratos enriquecidos con fertilizantes
+      ubicacion: Numeral 3.1.5
+      regla: al_menos_uno
+      minimos_primarios_pct: {N: 1, P2O5: 1, K2O: 1, MgO: 0.5, CaO: 0.5, SO3: 0.5, Na2O: 0.5}
+      contaminantes_a_declarar: [cadmio, arsénico, plomo, mercurio, cromo hexavalente, níquel, biuret (si contiene urea)]
+      limites_en_cuadros: [Cuadro N° 1 (micronutrientes), Cuadro N° 4 (E. coli y Salmonella spp.), Cuadro N° 10 (contaminantes y Cu/Zn)]
+      requisitos_especiales: [Un micronutriente declarado debe estar en 2 % o más en masa, Biuret máximo 1,2 % si contiene urea]
+      usa_biuret: true
+    - id: mezcla
+      nombre: Mezclas
+      ubicacion: Numeral 3.3
+      regla: cada_declarado
+      minimos_primarios_pct: {N: 1.5, P2O5: 1.5, K2O: 1.5, MgO: 0.5, CaO: 0.5, SO3: 0.5, Na2O: 0.5}
+      minimos_otros_pct: {carbono_organico: 3}
+      contaminantes_a_declarar: [Los de fertilizantes inorgánicos (Cuadro N° 6), biuret (si contiene urea)]
+      limites_en_cuadros: [Cuadro N° 1 (micronutrientes), Cuadro N° 4 y N° 5 (si incluye orgánicos o bioestimulantes), Cuadro N° 6 (contaminantes)]
+      requisitos_especiales: [El carbono orgánico, si se declara, debe ser de al menos 3 %, Biuret máximo 1,2 % si contiene urea]
+      usa_biuret: true
+    - id: bioestimulante
+      nombre: Bioestimulantes
+      ubicacion: Numeral 3.2
+      regla: sin_minimos
+      contaminantes_a_declarar: [cadmio, arsénico, plomo, mercurio, cromo hexavalente, níquel]
+      limites_en_cuadros: [Cuadro N° 4 (E. coli y Salmonella spp.), Cuadro N° 11 (metales y Cu/Zn)]
+      requisitos_especiales: [La norma no fija contenidos mínimos de nutrientes para bioestimulantes]
+      usa_biuret: false

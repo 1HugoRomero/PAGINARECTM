@@ -1,4 +1,4 @@
-# AgroAsesor API v0.3 · lectura de terreno detrás de la puerta de enlace de Django
+# AgroAsesor API · ejemplos generados por scripts/completar_openapi.py (no editar los ejemplos a mano)
 openapi: 3.0.3
 info:
   title: AgroAsesor API - lectura de terreno y catálogo
@@ -31,12 +31,32 @@ paths:
                     type: string
                   base_datos:
                     type: string
+              example:
+                status: ok
+                servicio: agroasesor-api
+                version: v1
+                base_datos: conectada_solo_lectura
+        '503':
+          description: La base de datos no está configurada o no responde
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                status: error
+                servicio: agroasesor-api
+                version: v1
+                base_datos: no_configurada
+      x-fuente-datos: Estado del servicio y especificación (sin datos agrícolas).
+      description: Estado de la API y de la conexión de solo lectura. Pública (sin sesión).
+      x-estado: implementado
   /auth/registro:
     post:
       tags:
       - Auth
       summary: Registrar usuario (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -44,6 +64,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: auth
+                  operacion: POST /auth/registro
       requestBody:
         required: false
         content:
@@ -51,12 +77,17 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /auth/login:
     post:
       tags:
       - Auth
       summary: Iniciar sesion (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -64,6 +95,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: auth
+                  operacion: POST /auth/login
       requestBody:
         required: false
         content:
@@ -71,12 +108,17 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /auth/logout:
     post:
       tags:
       - Auth
       summary: Cerrar sesion (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -84,6 +126,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: auth
+                  operacion: POST /auth/logout
       requestBody:
         required: false
         content:
@@ -91,6 +139,10 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /usuarios/me:
     get:
       tags:
@@ -104,31 +156,57 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                id: 1
+                usuario: ana
+                correo: ana@example.com
+                es_admin: false
+                perfil_completo: true
+                nombre: Ana Pérez
+                telefono: ''
+                comuna: Melipilla
+                rut: ''
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '404':
           description: No existe o no pertenece al usuario
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_ENCONTRADO
+                  mensaje: Usuario no encontrado.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       security: &id001
       - gatewayAuth: []
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
     patch:
       tags:
       - Usuarios
       summary: Mi perfil (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -136,6 +214,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: usuarios
+                  operacion: PATCH /usuarios/me
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       requestBody:
         required: false
         content:
@@ -143,6 +247,10 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /predios:
     get:
       tags:
@@ -156,24 +264,50 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                predios:
+                - id: 1
+                  nombre: Predio Ana
+                  ubicacion: Melipilla
+                  zona_id: 1
+                  superficie:
+                    hectareas: 10.5
+                    metros_cuadrados: 105000.0
+                    texto: 10,5 ha (105.000 m²)
+                  latitud: -33.7
+                  longitud: -71.2
+                  geojson: null
+                  potreros: 1
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       security: *id001
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
     post:
       tags:
       - Predios
       summary: Listar o crear predios (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -181,6 +315,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: predios
+                  operacion: POST /predios
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       requestBody:
         required: false
         content:
@@ -188,6 +348,10 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /predios/{predio_id}:
     get:
       tags:
@@ -201,24 +365,49 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                id: 1
+                nombre: Predio Ana
+                ubicacion: Melipilla
+                zona_id: 1
+                superficie:
+                  hectareas: 10.5
+                  metros_cuadrados: 105000.0
+                  texto: 10,5 ha (105.000 m²)
+                latitud: -33.7
+                longitud: -71.2
+                geojson: null
+                potreros: 1
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '404':
           description: No existe o no pertenece al usuario
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_ENCONTRADO
+                  mensaje: Predio no encontrado.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: &id002
       - name: predio_id
         in: path
@@ -227,11 +416,15 @@ paths:
           type: integer
           minimum: 1
       security: *id001
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
     patch:
       tags:
       - Predios
       summary: Detalle predio (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -239,6 +432,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: predios
+                  operacion: PATCH /predios/<int:predio_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: *id002
       requestBody:
         required: false
@@ -247,11 +466,16 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
     delete:
       tags:
       - Predios
       summary: Detalle predio (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -259,7 +483,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: predios
+                  operacion: DELETE /predios/<int:predio_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: *id002
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /predios/{predio_id}/potreros:
     get:
       tags:
@@ -273,24 +526,59 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                potreros:
+                - id: 1
+                  predio_id: 1
+                  nombre: Norte
+                  cultivo_id: 1
+                  cultivo: Trigo
+                  variedad: Invierno
+                  fecha_siembra: '2026-05-10'
+                  fecha_cosecha: null
+                  superficie:
+                    hectareas: 1.5
+                    metros_cuadrados: 15000.0
+                    texto: 1,5 ha (15.000 m²)
+                  latitud: -33.7
+                  longitud: -71.2
+                  perimetro:
+                  - - -33.7
+                    - -71.2
+                  - - -33.7
+                    - -71.1
+                  tiene_perimetro: true
+                  geojson: null
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '404':
           description: No existe o no pertenece al usuario
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_ENCONTRADO
+                  mensaje: Predio no encontrado.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: &id003
       - name: predio_id
         in: path
@@ -299,11 +587,15 @@ paths:
           type: integer
           minimum: 1
       security: *id001
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
     post:
       tags:
       - Potreros
       summary: Potreros de predio (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -311,6 +603,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: potreros
+                  operacion: POST /predios/<int:predio_id>/potreros
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: *id003
       requestBody:
         required: false
@@ -319,6 +637,10 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /potreros/{potrero_id}:
     get:
       tags:
@@ -332,24 +654,58 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                id: 1
+                predio_id: 1
+                nombre: Norte
+                cultivo_id: 1
+                cultivo: Trigo
+                variedad: Invierno
+                fecha_siembra: '2026-05-10'
+                fecha_cosecha: null
+                superficie:
+                  hectareas: 1.5
+                  metros_cuadrados: 15000.0
+                  texto: 1,5 ha (15.000 m²)
+                latitud: -33.7
+                longitud: -71.2
+                perimetro:
+                - - -33.7
+                  - -71.2
+                - - -33.7
+                  - -71.1
+                tiene_perimetro: true
+                geojson: null
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '404':
           description: No existe o no pertenece al usuario
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_ENCONTRADO
+                  mensaje: Potrero no encontrado.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: &id004
       - name: potrero_id
         in: path
@@ -358,11 +714,15 @@ paths:
           type: integer
           minimum: 1
       security: *id001
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
     patch:
       tags:
       - Potreros
       summary: Detalle potrero (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -370,6 +730,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: potreros
+                  operacion: PATCH /potreros/<int:potrero_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: *id004
       requestBody:
         required: false
@@ -378,11 +764,16 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
     delete:
       tags:
       - Potreros
       summary: Detalle potrero (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -390,13 +781,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: potreros
+                  operacion: DELETE /potreros/<int:potrero_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: *id004
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /potreros/{potrero_id}/confirmar-perimetro:
     post:
       tags:
       - Potreros
       summary: Confirmar perimetro (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -404,6 +825,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: potreros
+                  operacion: POST /potreros/<int:potrero_id>/confirmar-perimetro
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters:
       - name: potrero_id
         in: path
@@ -418,6 +865,10 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /cultivos:
     get:
       tags:
@@ -431,19 +882,48 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                cultivos:
+                - id: 1
+                  nombre: Trigo
+                  descripcion: ''
+                  rendimiento_ton_ha: 6.5
+                  densidad_siembra: 180.0
+                  unidad_siembra: kg/ha
+                  densidad:
+                    fuente: INIA
+                    url: https://example.org/a
+                    verificada: '2026-10-01'
+                    estado: verificado
+                  rendimiento:
+                    fuente: ''
+                    url: ''
+                    verificado: null
+                    estado: sin_verificar
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       security: *id001
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
   /cultivos/{cultivo_id}:
     get:
       tags:
@@ -457,24 +937,53 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                id: 1
+                nombre: Trigo
+                descripcion: ''
+                rendimiento_ton_ha: 6.5
+                densidad_siembra: 180.0
+                unidad_siembra: kg/ha
+                densidad:
+                  fuente: INIA
+                  url: https://example.org/a
+                  verificada: '2026-10-01'
+                  estado: verificado
+                rendimiento:
+                  fuente: ''
+                  url: ''
+                  verificado: null
+                  estado: sin_verificar
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '404':
           description: No existe o no pertenece al usuario
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_ENCONTRADO
+                  mensaje: Cultivo no encontrado.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters:
       - name: cultivo_id
         in: path
@@ -483,6 +992,9 @@ paths:
           type: integer
           minimum: 1
       security: *id001
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
   /insumos:
     get:
       tags:
@@ -496,19 +1008,50 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                insumos:
+                - id: 1
+                  nombre: Semilla trigo
+                  tipo: Semilla
+                  descripcion: ''
+                  dosis_hectarea: 180.0
+                  unidad_dosis: kg/ha
+                  vigente: true
+                  cultivo_id: 1
+                  fabricante: ''
+                  presentacion:
+                    cantidad: null
+                    unidad: ''
+                  numero_autorizacion_sag: ''
+                  verificacion:
+                    estado: sin_verificar
+                    fuente: ''
+                    url: ''
+                    fecha: null
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       security: *id001
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
   /insumos/{insumo_id}:
     get:
       tags:
@@ -522,24 +1065,55 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                id: 1
+                nombre: Semilla trigo
+                tipo: Semilla
+                descripcion: ''
+                dosis_hectarea: 180.0
+                unidad_dosis: kg/ha
+                vigente: true
+                cultivo_id: 1
+                fabricante: ''
+                presentacion:
+                  cantidad: null
+                  unidad: ''
+                numero_autorizacion_sag: ''
+                verificacion:
+                  estado: sin_verificar
+                  fuente: ''
+                  url: ''
+                  fecha: null
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '404':
           description: No existe o no pertenece al usuario
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_ENCONTRADO
+                  mensaje: Insumo no encontrado.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters:
       - name: insumo_id
         in: path
@@ -548,6 +1122,9 @@ paths:
           type: integer
           minimum: 1
       security: *id001
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
   /zonas:
     get:
       tags:
@@ -561,25 +1138,42 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                zonas:
+                - id: 1
+                  nombre: Melipilla
+                  descripcion: Zona central
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       security: *id001
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
   /temporadas:
     get:
       tags:
       - Temporadas
       summary: Listar o crear temporadas (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -587,11 +1181,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: temporadas
+                  operacion: GET /temporadas
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
     post:
       tags:
       - Temporadas
       summary: Listar o crear temporadas (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -599,6 +1223,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: temporadas
+                  operacion: POST /temporadas
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       requestBody:
         required: false
         content:
@@ -606,12 +1256,17 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /temporadas/{temporada_id}:
     get:
       tags:
       - Temporadas
       summary: Detalle temporada (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -619,6 +1274,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: temporadas
+                  operacion: GET /temporadas/<int:temporada_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: &id005
       - name: temporada_id
         in: path
@@ -626,11 +1307,15 @@ paths:
         schema:
           type: integer
           minimum: 1
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
     patch:
       tags:
       - Temporadas
       summary: Detalle temporada (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -638,6 +1323,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: temporadas
+                  operacion: PATCH /temporadas/<int:temporada_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: *id005
       requestBody:
         required: false
@@ -646,11 +1357,16 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
     delete:
       tags:
       - Temporadas
       summary: Detalle temporada (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -658,13 +1374,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: temporadas
+                  operacion: DELETE /temporadas/<int:temporada_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: *id005
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /calculos/semillas:
     post:
       tags:
       - Calculos
       summary: Calcular semillas (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -672,6 +1418,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: calculos
+                  operacion: POST /calculos/semillas
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       requestBody:
         required: false
         content:
@@ -679,12 +1451,17 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /calculos/fertilizantes:
     post:
       tags:
       - Calculos
       summary: Calcular fertilizantes (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -692,6 +1469,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: calculos
+                  operacion: POST /calculos/fertilizantes
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       requestBody:
         required: false
         content:
@@ -699,12 +1502,17 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /calculos/cobertura:
     post:
       tags:
       - Calculos
       summary: Calcular cobertura (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -712,6 +1520,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: calculos
+                  operacion: POST /calculos/cobertura
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       requestBody:
         required: false
         content:
@@ -719,12 +1553,17 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /predicciones/rendimiento:
     post:
       tags:
       - Predicciones
       summary: Estimar rendimiento (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -732,6 +1571,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: predicciones
+                  operacion: POST /predicciones/rendimiento
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       requestBody:
         required: false
         content:
@@ -739,12 +1604,17 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /calendario:
     get:
       tags:
       - Calendario
       summary: Consultar calendario (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -752,12 +1622,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: calendario
+                  operacion: GET /calendario
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /actividades:
     get:
       tags:
       - Actividades
       summary: Listar o crear actividades (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -765,11 +1665,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: actividades
+                  operacion: GET /actividades
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
     post:
       tags:
       - Actividades
       summary: Listar o crear actividades (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -777,6 +1707,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: actividades
+                  operacion: POST /actividades
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       requestBody:
         required: false
         content:
@@ -784,12 +1740,17 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /actividades/{actividad_id}:
     get:
       tags:
       - Actividades
       summary: Detalle actividad (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -797,6 +1758,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: actividades
+                  operacion: GET /actividades/<int:actividad_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: &id006
       - name: actividad_id
         in: path
@@ -804,11 +1791,15 @@ paths:
         schema:
           type: integer
           minimum: 1
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
     patch:
       tags:
       - Actividades
       summary: Detalle actividad (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -816,6 +1807,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: actividades
+                  operacion: PATCH /actividades/<int:actividad_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: *id006
       requestBody:
         required: false
@@ -824,11 +1841,16 @@ paths:
             schema:
               type: object
               additionalProperties: true
+            example: {}
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
     delete:
       tags:
       - Actividades
       summary: Detalle actividad (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -836,13 +1858,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: actividades
+                  operacion: DELETE /actividades/<int:actividad_id>
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters: *id006
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /reportes/resumen:
     get:
       tags:
       - Reportes
       summary: Resumen reportes (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -850,12 +1902,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: reportes
+                  operacion: GET /reportes/resumen
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /reportes/predios/{predio_id}/historial:
     get:
       tags:
       - Reportes
       summary: Historial predio (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -863,6 +1945,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: reportes
+                  operacion: GET /reportes/predios/<int:predio_id>/historial
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
       parameters:
       - name: predio_id
         in: path
@@ -870,12 +1978,16 @@ paths:
         schema:
           type: integer
           minimum: 1
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /admin/resumen:
     get:
       tags:
       - Admin
       summary: Resumen administrador (pendiente)
-      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia.'
+      description: 'Ruta reservada: devuelve HTTP 501. No se han implementado operaciones ni persistencia. PENDIENTE:
+        responde 501 hasta que se implemente. PENDIENTE: responde 501 hasta que se implemente.'
       responses:
         '501':
           description: Funcionalidad todavía no implementada
@@ -883,6 +1995,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_IMPLEMENTADO
+                  mensaje: Endpoint definido en el borrador; aún no implementado.
+                  modulo: admin
+                  operacion: GET /admin/resumen
+        '401':
+          description: Sin autenticación de Django válida o firma vencida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
+        '503':
+          description: API sin clave interna o sin base de datos configurada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
+        '403':
+          description: El usuario no es administrador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: SIN_PERMISO
+                  mensaje: Esta operación es solo para administradores.
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: pendiente
   /catalogo/categorias:
     get:
       tags:
@@ -891,6 +2042,22 @@ paths:
       responses:
         '200':
           description: Lista de categorías
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                resultados:
+                - id: semillas
+                  nombre: Semillas y material de siembra
+                  descripcion: Variedades, lotes, pureza y germinación.
+                - id: fertilizantes
+                  nombre: Fertilizantes
+                  descripcion: Nutrición vegetal, composición y trazabilidad.
+      x-fuente-datos: 'data/catalogo_agricola.yaml: fichas SAG (etiquetas publicadas), INIA (publicaciones técnicas)
+        y ODEPA.'
+      description: Categorías agrícolas disponibles. Pública (sin sesión).
+      x-estado: implementado
   /catalogo/fuentes:
     get:
       tags:
@@ -899,6 +2066,28 @@ paths:
       responses:
         '200':
           description: Fuentes SAG, INIA, ODEPA
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                fecha_consulta: '2026-10-28'
+                resultados:
+                - id: sag_plaguicidas
+                  organismo: SAG
+                  titulo: Listado de plaguicidas autorizados, prohibidos, restringidos y cancelados
+                  url: https://www.sag.gob.cl/ambitos-de-accion/listado-de-plaguicidas-autorizados-prohibidos-restringidos-y-cancelados-etiquetas-y-hds
+                  actualizacion_publicada: '2026-10-26'
+                  tipo: registro_publico
+                - id: sag_semillas
+                  organismo: SAG
+                  titulo: Requisitos para la comercialización de semillas
+                  url: https://www.sag.gob.cl/ambitos-de-accion/requisitos-para-la-comercializacion-de-semillas
+                  tipo: normativa
+      x-fuente-datos: 'data/catalogo_agricola.yaml: fichas SAG (etiquetas publicadas), INIA (publicaciones técnicas)
+        y ODEPA.'
+      description: Fuentes institucionales y fecha de consulta. Pública (sin sesión).
+      x-estado: implementado
   /catalogo/productos:
     get:
       tags:
@@ -930,8 +2119,64 @@ paths:
       responses:
         '200':
           description: Lista paginada con procedencia y advertencias
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                total: 1
+                pagina: 1
+                limite: 20
+                resultados:
+                - id: fungisei
+                  nombre: FUNGISEI
+                  categoria: fungicidas
+                  clase: producto_con_etiqueta_sag
+                  descripcion: Fungicida y bactericida biológico; etiqueta SAG indica Bacillus subtilis cepa IAB/BS03.
+                  fuente_ids:
+                  - sag_fungisei
+                  - sag_plaguicidas
+                  fecha_revision: '2026-10-28'
+                  estado_autorizacion: requiere_cotejo_vigente
+                  presentaciones_comerciales_verificadas: []
+                  precio_clp: null
+                  registro_indicado_en_etiqueta: '20045'
+                  ingrediente_activo_en_etiqueta: Bacillus subtilis cepa IAB/BS03
+                  fabricante: SEIPASA S.A.
+                  cotejado_con_etiqueta: '2026-11-11'
+                  advertencias:
+                  - Seguir estrictamente la etiqueta y HDS
+                  - No calcular aplicaciones sin validar cultivo, enfermedad y vigencia del registro.
+                  fuentes:
+                  - id: sag_fungisei
+                    organismo: SAG
+                    titulo: Etiqueta y HDS FUNGISEI
+                    url: https://www.sag.gob.cl/sites/default/files/FUNGISEI%20ET%20y%20HDS%2019-12-2025.pdf
+                    actualizacion_publicada: '2025-12-19'
+                    fecha_consulta: '2026-11-11'
+                    tipo: etiqueta_producto
+                  - id: sag_plaguicidas
+                    organismo: SAG
+                    titulo: Listado de plaguicidas autorizados, prohibidos, restringidos y cancelados
+                    url: https://www.sag.gob.cl/ambitos-de-accion/listado-de-plaguicidas-autorizados-prohibidos-restringidos-y-cancelados-etiquetas-y-hds
+                    actualizacion_publicada: '2026-10-26'
+                    tipo: registro_publico
+                aviso: Catálogo informativo. Una ficha SAG publicada no acredita por sí sola autorización vigente.
+                  No sustituye etiqueta, asesoría técnica ni verificación del registro actual.
         '400':
           description: Filtro inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: VALIDACION_CATALOGO
+                  mensaje: Categoría desconocida
+      x-fuente-datos: 'data/catalogo_agricola.yaml: fichas SAG (etiquetas publicadas), INIA (publicaciones técnicas)
+        y ODEPA.'
+      description: Buscar y filtrar insumos agrícolas. Pública (sin sesión).
+      x-estado: implementado
   /catalogo/productos/{product_id}:
     get:
       tags:
@@ -946,8 +2191,58 @@ paths:
       responses:
         '200':
           description: Ficha del producto
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: fungisei
+                nombre: FUNGISEI
+                categoria: fungicidas
+                clase: producto_con_etiqueta_sag
+                descripcion: Fungicida y bactericida biológico; etiqueta SAG indica Bacillus subtilis cepa IAB/BS03.
+                fuente_ids:
+                - sag_fungisei
+                - sag_plaguicidas
+                fecha_revision: '2026-10-28'
+                estado_autorizacion: requiere_cotejo_vigente
+                presentaciones_comerciales_verificadas: []
+                precio_clp: null
+                registro_indicado_en_etiqueta: '20045'
+                ingrediente_activo_en_etiqueta: Bacillus subtilis cepa IAB/BS03
+                fabricante: SEIPASA S.A.
+                cotejado_con_etiqueta: '2026-11-11'
+                advertencias:
+                - Seguir estrictamente la etiqueta y HDS
+                - No calcular aplicaciones sin validar cultivo, enfermedad y vigencia del registro.
+                fuentes:
+                - id: sag_fungisei
+                  organismo: SAG
+                  titulo: Etiqueta y HDS FUNGISEI
+                  url: https://www.sag.gob.cl/sites/default/files/FUNGISEI%20ET%20y%20HDS%2019-12-2025.pdf
+                  actualizacion_publicada: '2025-12-19'
+                  fecha_consulta: '2026-11-11'
+                  tipo: etiqueta_producto
+                - id: sag_plaguicidas
+                  organismo: SAG
+                  titulo: Listado de plaguicidas autorizados, prohibidos, restringidos y cancelados
+                  url: https://www.sag.gob.cl/ambitos-de-accion/listado-de-plaguicidas-autorizados-prohibidos-restringidos-y-cancelados-etiquetas-y-hds
+                  actualizacion_publicada: '2026-10-26'
+                  tipo: registro_publico
         '404':
           description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_ENCONTRADO
+                  mensaje: Producto no encontrado
+      x-fuente-datos: 'data/catalogo_agricola.yaml: fichas SAG (etiquetas publicadas), INIA (publicaciones técnicas)
+        y ODEPA.'
+      description: Ficha de un insumo y sus fuentes. Pública (sin sesión).
+      x-estado: implementado
   /catalogo/referencias-siembra:
     get:
       tags:
@@ -956,6 +2251,45 @@ paths:
       responses:
         '200':
           description: Referencias contextualizadas
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                resultados:
+                - id: trigo-invierno
+                  cultivo: Trigo
+                  sistema: Trigos de invierno o hábito alternativo
+                  dosis_min_kg_ha: 160
+                  dosis_max_kg_ha: 200
+                  fuente_id: inia_trigo
+                  estado_verificacion: citada_sin_cotejar
+                  nota: Referencia técnica INIA; depende de variedad, tamaño y calidad del grano. No es una prescripción
+                    individual.
+                  fuente:
+                    id: inia_trigo
+                    organismo: INIA
+                    titulo: Capítulo técnico sobre siembra de trigo, sección 2.2.3 Dosis de semilla
+                    url: https://biblioteca.inia.cl/bitstreams/0cd81922-fbd9-4fe9-9653-8567e65972a5/download
+                    tipo: publicacion_tecnica
+                - id: trigo-primavera
+                  cultivo: Trigo
+                  sistema: Trigos de primavera
+                  dosis_min_kg_ha: 200
+                  dosis_max_kg_ha: 220
+                  fuente_id: inia_trigo
+                  estado_verificacion: citada_sin_cotejar
+                  nota: Referencia técnica INIA; ajustar por variedad, calidad de semilla y objetivo de población.
+                  fuente:
+                    id: inia_trigo
+                    organismo: INIA
+                    titulo: Capítulo técnico sobre siembra de trigo, sección 2.2.3 Dosis de semilla
+                    url: https://biblioteca.inia.cl/bitstreams/0cd81922-fbd9-4fe9-9653-8567e65972a5/download
+                    tipo: publicacion_tecnica
+      x-fuente-datos: 'data/catalogo_agricola.yaml: fichas SAG (etiquetas publicadas), INIA (publicaciones técnicas)
+        y ODEPA.'
+      description: Rangos de siembra documentados por INIA. Pública (sin sesión).
+      x-estado: implementado
   /catalogo/calcular-sacos:
     post:
       tags:
@@ -997,13 +2331,61 @@ paths:
                   exclusiveMinimum: 0
                   description: Precio informado por el usuario, no precio oficial
               additionalProperties: false
+            example:
+              referencia_id: trigo-invierno
+              superficie_ha: 1.5
+              peso_saco_kg: 25
+              dosis_kg_ha: 180
       responses:
         '200':
           description: Cálculo orientativo con fuente
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                referencia_id: trigo-invierno
+                cultivo: Trigo
+                sistema: Trigos de invierno o hábito alternativo
+                superficie_ha: 1.5
+                dosis_elegida_kg_ha: 180.0
+                peso_saco_simulado_kg: 25.0
+                semilla_requerida_kg: 270.0
+                sacos_necesarios: 11
+                capacidad_total_comprada_kg: 275.0
+                sobrante_teorico_kg: 5.0
+                costo_estimado_clp: null
+                fuente:
+                  id: inia_trigo
+                  organismo: INIA
+                  titulo: Capítulo técnico sobre siembra de trigo, sección 2.2.3 Dosis de semilla
+                  url: https://biblioteca.inia.cl/bitstreams/0cd81922-fbd9-4fe9-9653-8567e65972a5/download
+                  tipo: publicacion_tecnica
+                advertencia: Cálculo orientativo para compra. El tamaño de saco lo ingresa el usuario; no representa
+                  un producto comercial verificado. Confirmar dosis con asesoría técnica y datos del lote.
         '400':
           description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: VALIDACION_CATALOGO
+                  mensaje: Dosis fuera del rango de referencia INIA; revisar sistema, variedad y condiciones
         '415':
           description: Se requiere JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: TIPO_CONTENIDO
+                  mensaje: Se requiere application/json
+      x-fuente-datos: 'data/catalogo_agricola.yaml: fichas SAG (etiquetas publicadas), INIA (publicaciones técnicas)
+        y ODEPA.'
+      x-estado: implementado
   /catalogo/fertilizantes/resumen:
     get:
       tags:
@@ -1012,6 +2394,46 @@ paths:
       responses:
         '200':
           description: Resumen del catálogo
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                version: 0.2.0
+                fecha_consulta: '2026-11-11'
+                aviso: Composición referencial (grado típico) publicada por FAO/IFA. El contenido que vale para
+                  un producto concreto es el que declara su etiqueta; el fabricante lo garantiza dentro de límites
+                  de tolerancia. No es una recomendación de fertilización.
+                nutrientes:
+                - id: N
+                  nombre: Nitrógeno
+                - id: P2O5
+                  nombre: Fósforo expresado como P2O5
+                grupos:
+                - id: nitrogenados
+                  nombre: Fertilizantes nitrogenados
+                - id: fosfatados
+                  nombre: Fertilizantes fosfatados
+                fuentes:
+                - id: fao_ifa_2002
+                  organismo: FAO / IFA
+                  titulo: Los fertilizantes y su uso. Una guía de bolsillo para los oficiales de extensión. Cuarta
+                    edición (Roma, 2002)
+                  url: https://www.fertilizer.org/wp-content/uploads/2023/01/2002_IFA_FAO_fertilizantesuso.pdf
+                  registro_fao: https://agris.fao.org/search/en/records/647241a908fd68d5460035aa
+                  tipo: publicacion_tecnica
+                - id: sag_res_8651_2024
+                  organismo: SAG / Ministerio de Agricultura
+                  titulo: 'Resolución N° 8.651 exenta de 2024: establece contenidos mínimos de elementos nutricionales
+                    y contenidos máximos de elementos contaminantes en fertilizantes y bioestimulantes (Diario Oficial
+                    N° 44.027, 18-12-2024)'
+                  url: https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/18/44027/01/2585124.pdf
+                  tipo: normativa
+                total_fertilizantes: 19
+      x-fuente-datos: 'data/fertilizantes.yaml: FAO/IFA, «Los fertilizantes y su uso», 4.ª ed., 2002 (Cuadros 2
+        y 3, pp. 38-39; Anexo p. 77) y Resolución SAG N° 8.651 exenta de 2024 (Diario Oficial, 18-12-2024).'
+      description: Versión, fuentes, nutrientes y grupos del catálogo de fertilizantes. Pública (sin sesión).
+      x-estado: implementado
   /catalogo/fertilizantes:
     get:
       tags:
@@ -1027,17 +2449,181 @@ paths:
         name: nutriente
         schema:
           type: string
-          enum: [N, P2O5, K2O, Mg, S]
+          enum:
+          - N
+          - P2O5
+          - K2O
+          - Mg
+          - S
       - in: query
         name: grupo
         schema:
           type: string
-          enum: [nitrogenados, fosfatados, potasicos, magnesio, azufrados, multinutrientes]
+          enum:
+          - nitrogenados
+          - fosfatados
+          - potasicos
+          - magnesio
+          - azufrados
+          - multinutrientes
       responses:
         '200':
           description: Lista con composición, fuente y estado de verificación
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                total: 8
+                resultados:
+                - id: sulfato-amonico
+                  nombre: Sulfato amónico
+                  formula: (NH4)2SO4
+                  formula_origen: fuente
+                  grupo: nitrogenados
+                  tipo_composicion: referencial
+                  grado:
+                    N: '21'
+                    P2O5: '0'
+                    K2O: '0'
+                    texto: N 21 · P2O5 0 · K2O 0
+                  composicion_referencial:
+                    N:
+                      informado_en_fuente: true
+                      min_pct: 21
+                      max_pct: 21
+                      es_rango: false
+                      texto: 21 %
+                      origen: fuente
+                    P2O5:
+                      informado_en_fuente: true
+                      min_pct: 0
+                      max_pct: 0
+                      es_rango: false
+                      texto: 0 %
+                      origen: fuente
+                    K2O:
+                      informado_en_fuente: true
+                      min_pct: 0
+                      max_pct: 0
+                      es_rango: false
+                      texto: 0 %
+                      origen: fuente
+                    MgO:
+                      informado_en_fuente: false
+                      min_pct: null
+                      max_pct: null
+                      es_rango: false
+                      texto: no informado
+                    S:
+                      informado_en_fuente: true
+                      min_pct: 23
+                      max_pct: 23
+                      es_rango: false
+                      texto: 23 %
+                      origen: fuente
+                  columnas_en_fuente:
+                    N: 21
+                    P2O5: 0
+                    K2O: 0
+                    Mg: null
+                    S: 23
+                  ubicacion_en_fuente: Cuadro 2, p. 38
+                  estado_verificacion: cotejada_con_fuente
+                  nota: null
+                  fuente:
+                    id: fao_ifa_2002
+                    organismo: FAO / IFA
+                    titulo: Los fertilizantes y su uso. Una guía de bolsillo para los oficiales de extensión. Cuarta
+                      edición (Roma, 2002)
+                    url: https://www.fertilizer.org/wp-content/uploads/2023/01/2002_IFA_FAO_fertilizantesuso.pdf
+                    registro_fao: https://agris.fao.org/search/en/records/647241a908fd68d5460035aa
+                    tipo: publicacion_tecnica
+                  aviso: Composición referencial publicada por FAO/IFA. Para tu producto vale lo que declara su
+                    etiqueta.
+                - id: nitrosulfato-amonico
+                  nombre: Nitrosulfato amónico
+                  formula: NH4NO3·(NH4)2SO4
+                  formula_origen: fuente
+                  grupo: nitrogenados
+                  tipo_composicion: referencial
+                  grado:
+                    N: '26'
+                    P2O5: '0'
+                    K2O: '0'
+                    texto: N 26 · P2O5 0 · K2O 0
+                  composicion_referencial:
+                    N:
+                      informado_en_fuente: true
+                      min_pct: 26
+                      max_pct: 26
+                      es_rango: false
+                      texto: 26 %
+                      origen: fuente
+                    P2O5:
+                      informado_en_fuente: true
+                      min_pct: 0
+                      max_pct: 0
+                      es_rango: false
+                      texto: 0 %
+                      origen: fuente
+                    K2O:
+                      informado_en_fuente: true
+                      min_pct: 0
+                      max_pct: 0
+                      es_rango: false
+                      texto: 0 %
+                      origen: fuente
+                    MgO:
+                      informado_en_fuente: false
+                      min_pct: null
+                      max_pct: null
+                      es_rango: false
+                      texto: no informado
+                    S:
+                      informado_en_fuente: true
+                      min_pct: 15
+                      max_pct: 15
+                      es_rango: false
+                      texto: 15 %
+                      origen: fuente
+                  columnas_en_fuente:
+                    N: 26
+                    P2O5: 0
+                    K2O: 0
+                    Mg: null
+                    S: 15
+                  ubicacion_en_fuente: Cuadro 2, p. 38 (algunos fertilizantes de importancia regional)
+                  estado_verificacion: cotejada_con_fuente
+                  nota: null
+                  fuente:
+                    id: fao_ifa_2002
+                    organismo: FAO / IFA
+                    titulo: Los fertilizantes y su uso. Una guía de bolsillo para los oficiales de extensión. Cuarta
+                      edición (Roma, 2002)
+                    url: https://www.fertilizer.org/wp-content/uploads/2023/01/2002_IFA_FAO_fertilizantesuso.pdf
+                    registro_fao: https://agris.fao.org/search/en/records/647241a908fd68d5460035aa
+                    tipo: publicacion_tecnica
+                  aviso: Composición referencial publicada por FAO/IFA. Para tu producto vale lo que declara su
+                    etiqueta.
+                aviso: Composición referencial (grado típico) publicada por FAO/IFA. El contenido que vale para
+                  un producto concreto es el que declara su etiqueta; el fabricante lo garantiza dentro de límites
+                  de tolerancia. No es una recomendación de fertilización.
         '400':
           description: Filtro inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: VALIDACION_FERTILIZANTES
+                  mensaje: Nutriente desconocido. Usa N, P2O5, K2O, MgO o S
+      x-fuente-datos: 'data/fertilizantes.yaml: FAO/IFA, «Los fertilizantes y su uso», 4.ª ed., 2002 (Cuadros 2
+        y 3, pp. 38-39; Anexo p. 77) y Resolución SAG N° 8.651 exenta de 2024 (Diario Oficial, 18-12-2024).'
+      description: Fertilizantes con composición de referencia (FAO/IFA 2002) y ubicación en la fuente. Pública
+        (sin sesión).
+      x-estado: implementado
   /catalogo/fertilizantes/{fert_id}:
     get:
       tags:
@@ -1053,14 +2639,98 @@ paths:
       responses:
         '200':
           description: Ficha con composición y fuente
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: superfosfato-simple
+                nombre: Superfosfato simple
+                formula: Ca(H2PO4)2 + CaSO4
+                formula_origen: fuente
+                grupo: fosfatados
+                tipo_composicion: referencial
+                grado:
+                  N: '0'
+                  P2O5: 16–20
+                  K2O: '0'
+                  texto: N 0 · P2O5 16–20 · K2O 0
+                composicion_referencial:
+                  N:
+                    informado_en_fuente: true
+                    min_pct: 0
+                    max_pct: 0
+                    es_rango: false
+                    texto: 0 %
+                    origen: fuente
+                  P2O5:
+                    informado_en_fuente: true
+                    min_pct: 16
+                    max_pct: 20
+                    es_rango: true
+                    texto: 16–20 %
+                    origen: fuente
+                  K2O:
+                    informado_en_fuente: true
+                    min_pct: 0
+                    max_pct: 0
+                    es_rango: false
+                    texto: 0 %
+                    origen: fuente
+                  MgO:
+                    informado_en_fuente: false
+                    min_pct: null
+                    max_pct: null
+                    es_rango: false
+                    texto: no informado
+                  S:
+                    informado_en_fuente: true
+                    min_pct: 12
+                    max_pct: 12
+                    es_rango: false
+                    texto: 12 %
+                    origen: fuente
+                columnas_en_fuente:
+                  N: 0
+                  P2O5:
+                  - 16
+                  - 20
+                  K2O: 0
+                  Mg: null
+                  S: 12
+                ubicacion_en_fuente: Cuadro 2, p. 38
+                estado_verificacion: cotejada_con_fuente
+                nota: null
+                fuente:
+                  id: fao_ifa_2002
+                  organismo: FAO / IFA
+                  titulo: Los fertilizantes y su uso. Una guía de bolsillo para los oficiales de extensión. Cuarta
+                    edición (Roma, 2002)
+                  url: https://www.fertilizer.org/wp-content/uploads/2023/01/2002_IFA_FAO_fertilizantesuso.pdf
+                  registro_fao: https://agris.fao.org/search/en/records/647241a908fd68d5460035aa
+                  tipo: publicacion_tecnica
+                aviso: Composición referencial publicada por FAO/IFA. Para tu producto vale lo que declara su etiqueta.
         '404':
           description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_ENCONTRADO
+                  mensaje: Fertilizante no encontrado
+      x-fuente-datos: 'data/fertilizantes.yaml: FAO/IFA, «Los fertilizantes y su uso», 4.ª ed., 2002 (Cuadros 2
+        y 3, pp. 38-39; Anexo p. 77) y Resolución SAG N° 8.651 exenta de 2024 (Diario Oficial, 18-12-2024).'
+      description: Ficha de un fertilizante. Pública (sin sesión).
+      x-estado: implementado
   /catalogo/calcular-fertilizante:
     post:
       tags:
       - Fertilizantes
       summary: Kilos de producto para aportar el requerimiento de nutriente indicado por el usuario
-      description: No recomienda dosis. Si la fuente da un rango de ley, se debe indicar la ley declarada en la etiqueta.
+      description: No recomienda dosis. Si la fuente da un rango de ley, se debe indicar la ley declarada en la
+        etiqueta.
       requestBody:
         required: true
         content:
@@ -1077,7 +2747,12 @@ paths:
                   example: superfosfato-triple
                 nutriente:
                   type: string
-                  enum: [N, P2O5, K2O, Mg, S]
+                  enum:
+                  - N
+                  - P2O5
+                  - K2O
+                  - Mg
+                  - S
                   example: P2O5
                 requerimiento_kg_ha:
                   type: number
@@ -1101,13 +2776,90 @@ paths:
                   exclusiveMinimum: 0
                   example: 25
               additionalProperties: false
+            example:
+              fertilizante_id: urea
+              nutriente: N
+              requerimiento_kg_ha: 92
+              superficie_ha: 2
+              peso_saco_kg: 25
       responses:
         '200':
           description: Producto por hectárea, total, aportes de otros nutrientes y sacos
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                fertilizante:
+                  id: urea
+                  nombre: Urea
+                nutriente: N
+                requerimiento_kg_ha: 92
+                superficie_ha: 2.0
+                ley:
+                  tipo: referencial
+                  valor_pct: 45–46
+                  min_pct: 45
+                  max_pct: 46
+                formula: producto_kg_ha = requerimiento_kg_ha × 100 / ley_%; total_kg = producto_kg_ha × superficie_ha
+                producto_kg_ha:
+                  min: 200.0
+                  max: 204.44
+                producto_total_kg:
+                  min: 400.0
+                  max: 408.89
+                aportes_adicionales_kg_ha:
+                - nutriente: P2O5
+                  min: 0.0
+                  max: 0.0
+                - nutriente: K2O
+                  min: 0.0
+                  max: 0.0
+                fuente:
+                  id: fao_ifa_2002
+                  organismo: FAO / IFA
+                  titulo: Los fertilizantes y su uso. Una guía de bolsillo para los oficiales de extensión. Cuarta
+                    edición (Roma, 2002)
+                  url: https://www.fertilizer.org/wp-content/uploads/2023/01/2002_IFA_FAO_fertilizantesuso.pdf
+                  registro_fao: https://agris.fao.org/search/en/records/647241a908fd68d5460035aa
+                  tipo: publicacion_tecnica
+                ubicacion_en_fuente: Cuadro 2, p. 38 (algunos fertilizantes de importancia regional)
+                advertencias:
+                - 'El requerimiento lo ingresaste tú: este cálculo no recomienda dosis.'
+                - 'Se usó la composición REFERENCIAL de FAO/IFA porque no indicaste la ley de la etiqueta: el resultado
+                  puede variar con el producto real.'
+                sacos:
+                  peso_saco_kg: 25
+                  cantidad:
+                    min: 16
+                    max: 17
+                  sobrante_kg:
+                    min: 0.0
+                    max: 16.11
+                  nota: El peso del saco lo indicas tú; no corresponde a un envase comercial verificado.
         '400':
           description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: VALIDACION_FERTILIZANTES
+                  mensaje: 'Superfosfato simple no aporta K2O según la fuente. Aporta: P2O5, S'
         '415':
           description: Se requiere JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: TIPO_CONTENIDO
+                  mensaje: Se requiere application/json
+      x-fuente-datos: 'data/fertilizantes.yaml: FAO/IFA, «Los fertilizantes y su uso», 4.ª ed., 2002 (Cuadros 2
+        y 3, pp. 38-39; Anexo p. 77) y Resolución SAG N° 8.651 exenta de 2024 (Diario Oficial, 18-12-2024).'
+      x-estado: implementado
   /catalogo/conversiones:
     get:
       tags:
@@ -1116,6 +2868,32 @@ paths:
       responses:
         '200':
           description: Factores con fuente
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                fuente_id: fao_ifa_2002
+                ubicacion: Anexo «Factores de conversión», p. 77
+                factores:
+                - de: P2O5
+                  a: P
+                  factor: 0.4364
+                - de: P
+                  a: P2O5
+                  factor: 2.2914
+                fuente:
+                  id: fao_ifa_2002
+                  organismo: FAO / IFA
+                  titulo: Los fertilizantes y su uso. Una guía de bolsillo para los oficiales de extensión. Cuarta
+                    edición (Roma, 2002)
+                  url: https://www.fertilizer.org/wp-content/uploads/2023/01/2002_IFA_FAO_fertilizantesuso.pdf
+                  registro_fao: https://agris.fao.org/search/en/records/647241a908fd68d5460035aa
+                  tipo: publicacion_tecnica
+      x-fuente-datos: 'data/fertilizantes.yaml: FAO/IFA, «Los fertilizantes y su uso», 4.ª ed., 2002 (Cuadros 2
+        y 3, pp. 38-39; Anexo p. 77) y Resolución SAG N° 8.651 exenta de 2024 (Diario Oficial, 18-12-2024).'
+      description: Factores de conversión P2O5↔P y K2O↔K (FAO/IFA 2002, p. 77). Pública (sin sesión).
+      x-estado: implementado
   /catalogo/convertir:
     get:
       tags:
@@ -1127,13 +2905,21 @@ paths:
         required: true
         schema:
           type: string
-          enum: [P2O5, P, K2O, K]
+          enum:
+          - P2O5
+          - P
+          - K2O
+          - K
       - in: query
         name: a
         required: true
         schema:
           type: string
-          enum: [P2O5, P, K2O, K]
+          enum:
+          - P2O5
+          - P
+          - K2O
+          - K
       - in: query
         name: valor
         required: true
@@ -1143,8 +2929,39 @@ paths:
       responses:
         '200':
           description: Resultado de la conversión
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                de: P2O5
+                a: P
+                valor: 46
+                factor: 0.4364
+                resultado: 20.0744
+                fuente:
+                  id: fao_ifa_2002
+                  organismo: FAO / IFA
+                  titulo: Los fertilizantes y su uso. Una guía de bolsillo para los oficiales de extensión. Cuarta
+                    edición (Roma, 2002)
+                  url: https://www.fertilizer.org/wp-content/uploads/2023/01/2002_IFA_FAO_fertilizantesuso.pdf
+                  registro_fao: https://agris.fao.org/search/en/records/647241a908fd68d5460035aa
+                  tipo: publicacion_tecnica
+                ubicacion_en_fuente: Anexo «Factores de conversión», p. 77
         '400':
           description: Conversión o valor inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: VALIDACION_FERTILIZANTES
+                  mensaje: Conversión no disponible. Usa P2O5↔P o K2O↔K
+      x-fuente-datos: 'data/fertilizantes.yaml: FAO/IFA, «Los fertilizantes y su uso», 4.ª ed., 2002 (Cuadros 2
+        y 3, pp. 38-39; Anexo p. 77) y Resolución SAG N° 8.651 exenta de 2024 (Diario Oficial, 18-12-2024).'
+      description: Convierte un valor entre P2O5 y P o entre K2O y K. Pública (sin sesión).
+      x-estado: implementado
   /catalogo/normativa/contenidos-minimos:
     get:
       tags:
@@ -1153,6 +2970,83 @@ paths:
       responses:
         '200':
           description: Mínimos por tipo de fertilizante con fuente
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                fuente_id: sag_res_8651_2024
+                vigencia: 'Numeral 5 del Resuelvo: los fertilizantes y bioestimulantes deben cumplir las exigencias
+                  del decreto N° 61 (2023) y sus resoluciones complementarias a partir de la entrada en vigencia
+                  de ese decreto.'
+                biuret_maximo_pct: 1.2
+                biuret_ubicacion: 3.1.2 B.v, 3.1.3 B.v, 3.1.5 B.iv y 3.3 B.ii (productos que contienen urea)
+                categorias:
+                - id: organico
+                  nombre: Grupo 1 · Fertilizantes orgánicos
+                  ubicacion: Numeral 3.1.1
+                  regla: al_menos_uno
+                  minimos_primarios_pct:
+                    N: 1
+                    P2O5: 1
+                    K2O: 1
+                  minimos_otros_pct:
+                    carbono_organico: 5
+                  contaminantes_a_declarar:
+                  - cadmio
+                  - arsénico
+                  limites_en_cuadros:
+                  - Cuadro N° 2 (Cu y Zn)
+                  - Cuadro N° 3 (Cu y Zn en guano estabilizado)
+                  requisitos_especiales:
+                  - Declarar ausencia de E. coli y Salmonella spp.
+                  usa_biuret: false
+                - id: inorganico
+                  nombre: Grupo 2 · Fertilizantes inorgánicos
+                  ubicacion: Numeral 3.1.2
+                  regla: subgrupo_por_cantidad
+                  un_macronutriente_pct:
+                    N: 5
+                    P2O5: 5
+                    K2O: 3
+                    MgO: 2
+                    CaO: 6
+                    SO3: 5
+                    Na2O: 1
+                  varios_macronutrientes_pct:
+                    N: 1.5
+                    P2O5: 1.5
+                    K2O: 1.5
+                    MgO: 0.5
+                    CaO: 0.5
+                    SO3: 0.5
+                    Na2O: 0.5
+                  contaminantes_a_declarar:
+                  - cadmio
+                  - arsénico
+                  limites_en_cuadros:
+                  - Cuadro N° 1 (micronutrientes)
+                  - Cuadro N° 6 (contaminantes y Cu/Zn)
+                  requisitos_especiales:
+                  - Los límites de Cu y Zn no aplican si se agregan intencionalmente para corregir una deficiencia
+                    y así se indica en la etiqueta
+                  - Biuret máximo 1
+                  usa_biuret: true
+                fuente:
+                  id: sag_res_8651_2024
+                  organismo: SAG / Ministerio de Agricultura
+                  titulo: 'Resolución N° 8.651 exenta de 2024: establece contenidos mínimos de elementos nutricionales
+                    y contenidos máximos de elementos contaminantes en fertilizantes y bioestimulantes (Diario Oficial
+                    N° 44.027, 18-12-2024)'
+                  url: https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/18/44027/01/2585124.pdf
+                  tipo: normativa
+                aviso: 'Los límites numéricos de los Cuadros N° 1 a 11 (micronutrientes, Cu/Zn, metales pesados
+                  y patógenos) no se transcriben: consulta la resolución publicada.'
+      x-fuente-datos: 'data/fertilizantes.yaml: FAO/IFA, «Los fertilizantes y su uso», 4.ª ed., 2002 (Cuadros 2
+        y 3, pp. 38-39; Anexo p. 77) y Resolución SAG N° 8.651 exenta de 2024 (Diario Oficial, 18-12-2024).'
+      description: Contenidos mínimos de nutrientes para fertilizantes inorgánicos (Res. SAG 8.651 exenta de 2024).
+        Pública (sin sesión).
+      x-estado: implementado
   /catalogo/revisar-etiqueta:
     post:
       tags:
@@ -1166,22 +3060,107 @@ paths:
               type: object
               description: Porcentajes declarados, expresados como en la norma
               properties:
-                N: {type: number}
-                P2O5: {type: number}
-                K2O: {type: number}
-                MgO: {type: number}
-                CaO: {type: number}
-                SO3: {type: number}
-                Na2O: {type: number}
+                N:
+                  type: number
+                P2O5:
+                  type: number
+                K2O:
+                  type: number
+                MgO:
+                  type: number
+                CaO:
+                  type: number
+                SO3:
+                  type: number
+                Na2O:
+                  type: number
               additionalProperties: false
-              example: {N: 46}
+              example:
+                N: 46
+            example:
+              categoria: inorganico
+              nutrientes:
+                N: 46
+              contiene_urea: true
+              biuret_pct: 1
       responses:
         '200':
           description: Cumple o no cada mínimo
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                categoria:
+                  id: inorganico
+                  nombre: Grupo 2 · Fertilizantes inorgánicos
+                  ubicacion: Numeral 3.1.2
+                alcance: Solo contenidos mínimos de nutrientes y biuret
+                cumple_contenidos_minimos: true
+                revisados:
+                - dato: N
+                  declarado_pct: 46
+                  minimo_pct: 5
+                  cumple: true
+                - dato: biuret
+                  declarado_pct: 1
+                  maximo_pct: 1.2
+                  cumple: true
+                observaciones:
+                - 'Subgrupo a: un solo macronutriente.'
+                no_revisado:
+                  contaminantes_a_declarar:
+                  - cadmio
+                  - arsénico
+                  limites_en_cuadros:
+                  - Cuadro N° 1 (micronutrientes)
+                  - Cuadro N° 6 (contaminantes y Cu/Zn)
+                  requisitos_especiales:
+                  - Los límites de Cu y Zn no aplican si se agregan intencionalmente para corregir una deficiencia
+                    y así se indica en la etiqueta
+                  - Biuret máximo 1
+                  otros:
+                  - Etiquetado (resolución de etiquetado)
+                  - Micronutrientes (Cuadro N° 1)
+                vigencia: 'Numeral 5 del Resuelvo: los fertilizantes y bioestimulantes deben cumplir las exigencias
+                  del decreto N° 61 (2023) y sus resoluciones complementarias a partir de la entrada en vigencia
+                  de ese decreto.'
+                fuente:
+                  id: sag_res_8651_2024
+                  organismo: SAG / Ministerio de Agricultura
+                  titulo: 'Resolución N° 8.651 exenta de 2024: establece contenidos mínimos de elementos nutricionales
+                    y contenidos máximos de elementos contaminantes en fertilizantes y bioestimulantes (Diario Oficial
+                    N° 44.027, 18-12-2024)'
+                  url: https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/18/44027/01/2585124.pdf
+                  tipo: normativa
+                aviso: 'Esta revisión NO acredita el cumplimiento de la Resolución 8.651: solo compara los contenidos
+                  mínimos de nutrientes declarados. Contaminantes, patógenos y etiquetado requieren análisis y los
+                  cuadros de la norma.'
         '400':
           description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: VALIDACION_FERTILIZANTES
+                  mensaje: 'Nutrientes no admitidos: S. Usa N, P2O5, K2O, MgO, CaO, SO3, Na2O (como en la norma)'
         '415':
           description: Se requiere JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: TIPO_CONTENIDO
+                  mensaje: Se requiere application/json
+      x-fuente-datos: 'data/fertilizantes.yaml: FAO/IFA, «Los fertilizantes y su uso», 4.ª ed., 2002 (Cuadros 2
+        y 3, pp. 38-39; Anexo p. 77) y Resolución SAG N° 8.651 exenta de 2024 (Diario Oficial, 18-12-2024).'
+      description: Compara los nutrientes declarados en una etiqueta con los mínimos de la Res. SAG 8.651/2024.
+        Pública (sin sesión).
+      x-estado: implementado
   /calculos:
     get:
       tags:
@@ -1209,18 +3188,40 @@ paths:
             application/json:
               schema:
                 type: object
+              example:
+                calculos:
+                - id: 1
+                  operacion: semillas
+                  potrero_id: 1
+                  potrero: Norte
+                  creado: '2026-10-02 09:00:00'
+                  entrada:
+                    ha: 1.5
+                  resultado:
+                    kg: 270
         '401':
           description: Sin autenticación válida o firma vencida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: NO_AUTENTICADO
+                  mensaje: Falta autenticación válida.
         '503':
           description: Base de datos o clave interna no configuradas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  codigo: AUTENTICACION_NO_CONFIGURADA
+                  mensaje: La API no tiene configurada la clave interna.
+      x-fuente-datos: Base de datos oficial de AgroAsesor (Django), abierta en modo solo lectura y filtrada por
+        el usuario firmado.
+      x-estado: implementado
   /openapi.json:
     get:
       tags:
@@ -1229,6 +3230,19 @@ paths:
       responses:
         '200':
           description: OpenAPI 3.0.3
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                openapi: 3.0.3
+                info:
+                  title: AgroAsesor API - lectura de terreno y catálogo
+                paths:
+                  '...': '...'
+      x-fuente-datos: Estado del servicio y especificación (sin datos agrícolas).
+      description: Esta especificación en JSON. Pública (sin sesión).
+      x-estado: implementado
 components:
   schemas:
     Error:

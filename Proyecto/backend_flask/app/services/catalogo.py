@@ -20,6 +20,8 @@ ESTADOS_REFERENCIA = {"cotejada_con_fuente", "citada_sin_cotejar"}
 OFFICIAL_HOSTS = {
     "www.sag.gob.cl",
     "sag.gob.cl",
+    "www.sag.cl",
+    "sag.cl",
     "www.inia.cl",
     "inia.cl",
     "biblioteca.inia.cl",

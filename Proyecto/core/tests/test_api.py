@@ -214,3 +214,47 @@ class PuertaDeEnlaceConFlaskTests(TestCase):
             r = self._cliente().get("/api/v1/openapi.json")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()["openapi"], "3.0.3")
+
+    # --- Catálogo de fertilizantes a través de Django (integración real Django → Flask) ---
+
+    def test_fertilizantes_publicos_por_django_sin_sesion(self):
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            r = self._cliente().get("/api/v1/catalogo/fertilizantes/superfosfato-simple")
+        self.assertEqual(r.status_code, 200)
+        comp = r.json()["composicion_referencial"]
+        self.assertEqual((comp["P2O5"]["min_pct"], comp["P2O5"]["max_pct"]), (16, 20))
+        self.assertEqual(comp["K2O"]["max_pct"], 0)
+        self.assertEqual(comp["S"]["min_pct"], 12)
+        self.assertEqual(r.json()["fuente"]["organismo"], "FAO / IFA")
+
+    def test_calculo_de_fertilizante_exige_sesion_y_calcula_por_django(self):
+        cuerpo = '{"fertilizante_id": "urea", "nutriente": "N", "requerimiento_kg_ha": 92, "superficie_ha": 2, "ley_declarada_pct": 46}'
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            anonimo = self._cliente().post("/api/v1/catalogo/calcular-fertilizante", cuerpo, content_type="application/json")
+            r = self._cliente(self.ana).post("/api/v1/catalogo/calcular-fertilizante", cuerpo, content_type="application/json")
+        self.assertEqual(anonimo.status_code, 401)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()["producto_total_kg"], {"min": 400.0, "max": 400.0})
+        self.assertEqual(r.json()["ley"]["tipo"], "declarada_en_etiqueta")
+
+    def test_revision_de_etiqueta_no_afirma_cumplimiento_integral(self):
+        cuerpo = '{"categoria": "inorganico", "nutrientes": {"N": 46}}'
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            r = self._cliente(self.ana).post("/api/v1/catalogo/revisar-etiqueta", cuerpo, content_type="application/json")
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.json()["cumple_contenidos_minimos"])
+        self.assertIn("NO acredita", r.json()["aviso"])
+
+    def test_ruta_pendiente_responde_501_por_django_solo_con_sesion(self):
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            self.assertEqual(self._cliente().get("/api/v1/actividades").status_code, 401)
+            r = self._cliente(self.ana).get("/api/v1/actividades")
+        self.assertEqual(r.status_code, 501)
+        self.assertEqual(r.json()["error"]["codigo"], "NO_IMPLEMENTADO")
+
+    def test_luis_no_ve_datos_de_ana_por_django(self):
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            c = self._cliente(self.luis)
+            self.assertEqual(c.get(f"/api/v1/potreros/{self.pot_ana.pk}").status_code, 404)
+            self.assertEqual([p["nombre"] for p in c.get("/api/v1/predios").json()["predios"]], ["Predio Luis"])
+            self.assertEqual(c.get(f"/api/v1/calculos?potrero_id={self.pot_ana.pk}").json()["calculos"], [])
