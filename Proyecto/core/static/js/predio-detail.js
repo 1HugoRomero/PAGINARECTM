@@ -25,48 +25,23 @@
   const geometryNode = document.getElementById('predio-detail-geometry');
   const mapElement = document.getElementById('predio-detail-map');
   const configNode = document.getElementById('maps-config');
-  if (!geometryNode || !mapElement || !configNode || !window.L) return;
+  if (!geometryNode || !mapElement || !configNode || !window.L || !window.AgroBasemap) return;
 
   const geometry = JSON.parse(geometryNode.textContent);
   const config = JSON.parse(configNode.textContent);
   const map = L.map(mapElement, { zoomControl: true });
-  const normalTiles = L.tileLayer(config.tile_url, {
-    attribution: config.attribution,
-    maxZoom: 19,
-    crossOrigin: true,
-  });
-  const satelliteTiles = L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    {
-      attribution: '&copy; Esri, Maxar, Earthstar Geographics, and the GIS User Community',
-      maxZoom: 19,
-      crossOrigin: true,
-    },
-  );
-  let activeTiles = normalTiles;
   const status = document.getElementById('predio-map-status');
   function showMapStatus(message) {
     if (status) status.textContent = message;
   }
-  [normalTiles, satelliteTiles].forEach((layer) => {
-    layer.on('tileerror', () => {
-      if (layer === activeTiles) {
-        showMapStatus('No se cargaron algunas teselas del mapa. Comprueba la conexión o cambia la vista.');
-      }
-    });
-    layer.on('tileload', () => {
-      if (layer === activeTiles) showMapStatus('');
-    });
+  // Fondo del mapa: Google Maps si hay clave configurada; si no (o si Google la rechaza) el mapa de respaldo.
+  const base = window.AgroBasemap.create(map, config, {
+    onTileError: () => showMapStatus('No se cargaron algunas teselas del mapa. Comprueba la conexión o cambia la vista.'),
+    onTileLoad: () => showMapStatus(''),
   });
-  normalTiles.addTo(map);
   document.querySelectorAll('[data-map-layer]').forEach((button) => {
     button.addEventListener('click', () => {
-      const nextTiles = button.dataset.mapLayer === 'satellite' ? satelliteTiles : normalTiles;
-      if (nextTiles !== activeTiles) {
-        map.removeLayer(activeTiles);
-        activeTiles = nextTiles;
-        activeTiles.addTo(map);
-      }
+      base.select(button.dataset.mapLayer === 'satellite' ? 'satellite' : 'normal');
       document.querySelectorAll('[data-map-layer]').forEach((item) => {
         const selected = item === button;
         item.classList.toggle('is-active', selected);

@@ -92,6 +92,7 @@ Se definen en `Proyecto/.env` (parte copiando `.env.example`). Ese archivo no se
 | `AGROASESOR_API_URL`, `AGROASESOR_INTERNAL_SECRET` | conexión con la API Flask; sin ellas `/api/v1/` responde 503 |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | inicio de sesión con Google; sin ellas el botón no aparece |
 | `GOOGLE_REDIRECT_URI` | opcional: URL de retorno exacta registrada en Google |
+| `GOOGLE_MAPS_API_KEY` | clave de Google Maps JavaScript API para el mapa de predios; sin ella se usa el mapa de respaldo |
 
 ### Inicio de sesión con Google
 

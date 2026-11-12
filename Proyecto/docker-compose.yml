@@ -19,6 +19,8 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      # Google Maps JavaScript API (mapa de predios): se lee del .env, nunca se escribe aquí.
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-${VITE_GOOGLE_MAPS_API_KEY:-}}
       DJANGO_DB_PATH: /data/db.sqlite3
       DATABASE_URL: ${DATABASE_URL:?Falta DATABASE_URL en el archivo .env}
       DJANGO_BACKUP_DIR: /backups

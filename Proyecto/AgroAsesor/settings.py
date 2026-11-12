@@ -49,6 +49,9 @@ MAP_TILE_URL = os.getenv(
     'MAP_TILE_URL',
     'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
 ).strip()
+# Google Maps JavaScript API (mapa de predios y potreros). La clave se lee SOLO de variables de entorno (.env no
+# versionado); también se acepta VITE_GOOGLE_MAPS_API_KEY. Sin clave se usa el mapa de respaldo (MAP_TILE_URL).
+GOOGLE_MAPS_API_KEY = (os.getenv('GOOGLE_MAPS_API_KEY') or os.getenv('VITE_GOOGLE_MAPS_API_KEY') or '').strip()
 MAP_TILE_ATTRIBUTION = os.getenv(
     'MAP_TILE_ATTRIBUTION',
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',

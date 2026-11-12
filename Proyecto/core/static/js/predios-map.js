@@ -90,31 +90,15 @@
   }
 
   function configureTiles() {
-    const normalTiles = L.tileLayer(config.tile_url, {
-      attribution: config.attribution,
-      maxZoom: 19,
-      crossOrigin: true,
-    });
-    const satelliteTiles = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: '&copy; Esri, Maxar, Earthstar Geographics, and the GIS User Community',
-        maxZoom: 19,
-        crossOrigin: true,
+    // Fondo del mapa: Google Maps si hay clave configurada; si no (o si Google la rechaza) el mapa de respaldo.
+    const base = window.AgroBasemap.create(map, config, {
+      onTileError: () => {
+        setStatus(
+          'No se cargaron algunas teselas del mapa. Puedes seguir dibujando; comprueba la conexión si el fondo aparece vacío.',
+        );
       },
-    );
-    let activeTiles = normalTiles;
-
-    [normalTiles, satelliteTiles].forEach((tiles) => {
-      tiles.on('tileerror', () => {
-        if (tiles === activeTiles) {
-          setStatus(
-            'No se cargaron algunas teselas del mapa. Puedes seguir dibujando; comprueba la conexión si el fondo aparece vacío.',
-          );
-        }
-      });
-      tiles.on('tileload', () => {
-        if (tiles === activeTiles && status.textContent.startsWith('No se cargaron algunas teselas del mapa.')) {
+      onTileLoad: () => {
+        if (status.textContent.startsWith('No se cargaron algunas teselas del mapa.')) {
           setStatus(
             form
               ? isPredioForm
@@ -123,7 +107,7 @@
               : 'Mapa listo.',
           );
         }
-      });
+      },
     });
 
     const viewControl = L.control({ position: 'topright' });
@@ -133,38 +117,84 @@
       container.setAttribute('aria-label', 'Cambiar vista del mapa');
       const buttons = new Map();
 
-      function selectView(tiles) {
-        if (tiles !== activeTiles) {
-          map.removeLayer(activeTiles);
-          activeTiles = tiles;
-          activeTiles.addTo(map);
-        }
-        buttons.forEach((button, layer) => {
-          const isActive = layer === activeTiles;
+      function selectView(view) {
+        base.select(view);
+        buttons.forEach((button, key) => {
+          const isActive = key === view;
           button.classList.toggle('is-active', isActive);
           button.setAttribute('aria-pressed', String(isActive));
         });
       }
 
       [
-        ['Normal', normalTiles],
-        ['Satélite', satelliteTiles],
-      ].forEach(([label, tiles]) => {
+        ['Normal', 'normal'],
+        ['Satélite', 'satellite'],
+      ].forEach(([label, view]) => {
         const button = L.DomUtil.create('button', '', container);
         button.type = 'button';
         button.textContent = label;
         button.setAttribute('aria-pressed', 'false');
-        button.addEventListener('click', () => selectView(tiles));
-        buttons.set(tiles, button);
+        button.addEventListener('click', () => selectView(view));
+        buttons.set(view, button);
       });
 
       L.DomEvent.disableClickPropagation(container);
       L.DomEvent.disableScrollPropagation(container);
-      selectView(normalTiles);
+      selectView('normal');
       return container;
     };
     viewControl.addTo(map);
-    normalTiles.addTo(map);
+  }
+
+  // En pantallas táctiles, mientras se dibuja hay dos modos: «Dibujar» (cada toque marca una esquina) y
+  // «Mover» (los toques no marcan nada: sirve para desplazar y acercar el mapa sin agregar puntos por error).
+  let panMode = false;
+  let drawModeControl = null;
+  function setPanMode(value) {
+    panMode = value;
+    mapElement.classList.toggle('is-pan-mode', panMode);
+    if (!drawModeControl) return;
+    drawModeControl.getContainer().querySelectorAll('button').forEach((button) => {
+      const isActive = (button.dataset.drawMode === 'pan') === panMode;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-pressed', String(isActive));
+    });
+  }
+  function showDrawModeControl() {
+    if (drawModeControl) return;
+    drawModeControl = L.control({ position: 'bottomleft' });
+    drawModeControl.onAdd = () => {
+      const container = L.DomUtil.create('div', 'leaflet-control map-draw-mode');
+      container.setAttribute('role', 'group');
+      container.setAttribute('aria-label', 'Modo del mapa mientras dibujas');
+      [
+        ['Dibujar', 'draw'],
+        ['Mover mapa', 'pan'],
+      ].forEach(([label, mode]) => {
+        const button = L.DomUtil.create('button', '', container);
+        button.type = 'button';
+        button.textContent = label;
+        button.dataset.drawMode = mode;
+        button.addEventListener('click', () => {
+          setPanMode(mode === 'pan');
+          setStatus(
+            mode === 'pan'
+              ? 'Modo mover: arrastra o acerca el mapa. Toca «Dibujar» para seguir marcando esquinas.'
+              : 'Modo dibujar: toca cada esquina en el mapa.',
+          );
+        });
+      });
+      L.DomEvent.disableClickPropagation(container);
+      L.DomEvent.disableScrollPropagation(container);
+      return container;
+    };
+    drawModeControl.addTo(map);
+    setPanMode(false);
+  }
+  function hideDrawModeControl() {
+    if (drawModeControl) drawModeControl.remove();
+    drawModeControl = null;
+    setPanMode(false);
   }
 
   function featureOf(layer) {
@@ -850,6 +880,7 @@
 
   function stopDrawing() {
     drawing = false;
+    hideDrawModeControl();
     drawingMode = null;
     drawPoints = [];
     if (previewLine) map.removeLayer(previewLine);
@@ -926,6 +957,7 @@
     drawing = true;
     drawingMode = mode;
     drawPoints = [];
+    showDrawModeControl();
     document.getElementById(mode === 'polygon' ? 'draw-perimeter' : 'measure-line').classList.add('is-active');
     document.getElementById('undo-point').disabled = true;
     document.getElementById('cancel-drawing').hidden = false;
@@ -959,6 +991,7 @@
       }
       return;
     }
+    if (panMode) return; // modo «Mover mapa»: el toque no marca una esquina
     drawPoints.push([event.latlng.lng, event.latlng.lat]);
     const latLngs = drawPoints.map((point) => [point[1], point[0]]);
     if (previewLine) map.removeLayer(previewLine);
@@ -1825,7 +1858,7 @@
     selectPlot(plot);
   }
 
-  if (!window.L) {
+  if (!window.L || !window.AgroBasemap) {
     if (!form) {
       // Sin cartografía el listado, el panel y la asignación de cultivos siguen funcionando.
       setStatus(
