@@ -15,4 +15,10 @@
             Continuar con Google
         </button>
     </form>
+    {% if not google_configurado %}
+        <p class="access-nota" role="note">
+            Modo desarrollo: para activar Google agrega <code>GOOGLE_CLIENT_ID</code> y <code>GOOGLE_CLIENT_SECRET</code>
+            en el archivo <code>.env</code> (ver README).
+        </p>
+    {% endif %}
 {% endif %}

@@ -297,7 +297,7 @@ class RecuperarContrasenaVistaOficialTests(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, 'recovery-shell')
         self.assertContains(r, 'policy-content')
-        self.assertContains(r, 'css/login.css?v=7')
+        self.assertContains(r, 'css/login.css?v=8')
 
 
 class ComposicionComunTests(TestCase):
@@ -312,7 +312,7 @@ class ComposicionComunTests(TestCase):
             self.assertIn('<span>Módulo de Acceso v2.1</span>', html, url)
             self.assertIn('class="access-panel"', html, url)
             self.assertIn('css/tema-figma.css', html, url)
-            self.assertIn('css/login.css?v=7', html, url)
+            self.assertIn('css/login.css?v=8', html, url)
             self.assertLess(html.index('css/tema-figma.css'), html.index('css/login.css'), url)
             self.assertRegex(html, r'(?s)<link href="[^"]*(outfit\.css|family=Outfit)[^"]*"')
             self.assertNotRegex(html, r'family=Inter|inter\.css', url)  # una sola tipografía

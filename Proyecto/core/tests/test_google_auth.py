@@ -80,6 +80,20 @@ class GoogleOAuthTests(TestCase):
         r = self.client.post('/cuenta/google/', follow=True)
         self.assertContains(r, 'todavía no está configurado')
 
+    @override_settings(GOOGLE_CLIENT_ID='', GOOGLE_CLIENT_SECRET='', DEBUG=True)
+    def test_en_desarrollo_sin_credenciales_el_boton_se_ve_con_el_aviso_de_configuracion(self):
+        for url in ('/login/', '/login/?mode=register'):
+            html = self.client.get(url).content.decode()
+            self.assertIn('Continuar con Google', html, url)
+            self.assertIn('class="access-nota"', html, url)
+            self.assertIn('<code>GOOGLE_CLIENT_ID</code>', html, url)
+        r = self.client.post('/cuenta/google/', follow=True)  # no simula un ingreso: vuelve con el aviso
+        self.assertContains(r, 'faltan GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET')
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_con_credenciales_no_aparece_el_aviso_de_configuracion(self):
+        self.assertNotContains(self.client.get('/login/'), 'class="access-nota"')
+
     def test_iniciar_exige_post_y_csrf(self):
         self.assertEqual(self.client.get('/cuenta/google/').status_code, 405)
         estricto = Client(enforce_csrf_checks=True)

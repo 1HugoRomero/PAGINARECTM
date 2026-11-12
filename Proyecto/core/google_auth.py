@@ -61,8 +61,12 @@ def google_configurado():
 
 
 def google_login_url():
-    """Ruta del botón «Continuar con Google»; vacía si faltan las credenciales (así no hay botón que no funcione)."""
-    return reverse('google_iniciar') if google_configurado() else ''
+    """Ruta del botón «Continuar con Google».
+
+    Con credenciales, el botón inicia el flujo real. Sin credenciales solo se muestra en desarrollo (DEBUG), junto a
+    un aviso de configuración; en producción se oculta para no ofrecer un acceso que no funciona.
+    """
+    return reverse('google_iniciar') if google_configurado() or settings.DEBUG else ''
 
 
 def _redirect_uri(request):
@@ -133,7 +137,11 @@ def _cuenta_por_correo(correo):
 @require_POST
 def google_iniciar(request):
     if not google_configurado():
-        messages.warning(request, 'El inicio de sesión con Google todavía no está configurado.')
+        messages.warning(
+            request,
+            'El inicio de sesión con Google todavía no está configurado: faltan GOOGLE_CLIENT_ID y '
+            'GOOGLE_CLIENT_SECRET en el archivo .env.',
+        )
         return redirect('login')
     verificador = secrets.token_urlsafe(64)
     flujo = {

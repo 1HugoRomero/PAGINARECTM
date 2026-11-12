@@ -492,6 +492,22 @@
     outline-offset: 2px;
 }
 
+.access-nota {
+    margin: 10px 0 0;
+    color: var(--acc-muted);
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.access-nota code {
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: #eef3f0;
+    color: var(--acc-ink);
+    font-size: 11.5px;
+}
+
 /* Mensajes */
 .error,
 .notice {
