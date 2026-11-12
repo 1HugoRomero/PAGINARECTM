@@ -6,7 +6,25 @@
     position: absolute;
     inset: 0;
     z-index: 0;
-    pointer-events: none;
+}
+
+/* Con Google activo, los gestos (arrastrar, rueda, dos dedos) llegan a Google aunque empiecen sobre un polígono;
+   los toques sobre predios y potreros los entrega agro-basemap.js. Los vértices de edición siguen siendo arrastrables. */
+.leaflet-container.has-google-base .leaflet-overlay-pane svg path.leaflet-interactive {
+    pointer-events: none !important;
+}
+
+/* Durante la animación de zoom de Google los polígonos se ocultan un instante y reaparecen ya alineados. */
+.leaflet-container.is-google-zooming .leaflet-overlay-pane,
+.leaflet-container.is-google-zooming .leaflet-marker-pane,
+.leaflet-container.is-google-zooming .leaflet-tooltip-pane {
+    opacity: 0;
+}
+
+.leaflet-container.has-google-base .leaflet-overlay-pane,
+.leaflet-container.has-google-base .leaflet-marker-pane,
+.leaflet-container.has-google-base .leaflet-tooltip-pane {
+    transition: opacity .12s ease;
 }
 
 .leaflet-container.has-google-base {

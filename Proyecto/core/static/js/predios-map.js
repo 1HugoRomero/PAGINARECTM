@@ -975,6 +975,8 @@
   }
 
   function addDrawingPoint(event) {
+    // Con Google Maps activo solo cuentan los toques que entrega Google (así un arrastre no marca una esquina).
+    if (map.agroGoogleMaster && !event.fromGoogle) return;
     if (!drawing) {
       if (latitudeInput && longitudeInput && !currentLayer) {
         latitudeInput.value = event.latlng.lat.toFixed(6);

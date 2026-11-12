@@ -53,23 +53,23 @@
     return loader;
   }
 
-  // Opciones del mapa para un zoom ágil. Leaflet es el ÚNICO que procesa la rueda, los botones + y − y los gestos
-  // (la capa de Google tiene gestureHandling 'none' y no recibe eventos), así que nada se procesa dos veces.
-  // - zoomAnimation false: cada cambio de nivel es inmediato y los polígonos y el fondo de Google cambian a la vez
-  //   (antes los polígonos se animaban 250 ms mientras Google saltaba de inmediato).
-  // - scrollWheelZoom false: la rueda la maneja enableFastWheel (abajo), un nivel por paso y sin acumulación.
+  // Opciones del mapa de dibujo (Leaflet). Con Google Maps activo, Google maneja TODOS los gestos (rueda, arrastre,
+  // dos dedos, doble clic y sus botones + y −) con su animación oficial, y Leaflet solo sigue su cámara para mantener
+  // los polígonos en su lugar: los gestos de Leaflet se apagan, así que ningún evento se procesa dos veces.
+  // Sin Google (mapa de respaldo) Leaflet maneja los gestos y la rueda avanza un nivel por paso.
   const MAP_OPTIONS = { zoomControl: true, zoomAnimation: false, scrollWheelZoom: false, zoomSnap: 1, zoomDelta: 1 };
-  const WHEEL_STEP_MS = 70; // tiempo mínimo entre dos niveles de zoom con la rueda
+  const GESTURES = ['dragging', 'touchZoom', 'doubleClickZoom', 'boxZoom', 'keyboard'];
+  const WHEEL_STEP_MS = 70; // tiempo mínimo entre dos niveles de zoom con la rueda (solo mapa de respaldo)
   const WHEEL_STEP_DELTA = 50; // desplazamiento de rueda (px) que equivale a un nivel
 
-  function enableFastWheel(map) {
+  function enableFastWheel(map, isGoogleActive) {
     const container = map.getContainer();
     let pending = 0;
     let lastStep = 0;
     L.DomEvent.on(container, 'wheel', (event) => {
+      if (isGoogleActive()) return; // la rueda la maneja Google
       L.DomEvent.preventDefault(event); // la rueda sobre el mapa hace zoom, no desplaza la página
       pending += L.DomEvent.getWheelDelta(event);
-      // Sin retrasos acumulados: lo que llega mientras se espera el siguiente paso no se guarda para después.
       pending = Math.max(-WHEEL_STEP_DELTA, Math.min(WHEEL_STEP_DELTA, pending));
       const now = Date.now();
       if (Math.abs(pending) < WHEEL_STEP_DELTA || now - lastStep < WHEEL_STEP_MS) return;
@@ -78,14 +78,47 @@
       const target = map.getZoom() + direction;
       if (target < map.getMinZoom() || target > map.getMaxZoom()) return;
       lastStep = now;
-      // El punto bajo el cursor se mantiene en su lugar.
       map.setZoomAround(map.mouseEventToContainerPoint(event), target, { animate: false });
     });
   }
 
+  // ¿El punto está dentro del polígono? (para saber qué predio o potrero se tocó sobre el mapa de Google)
+  function ringContains(ring, point) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const a = ring[i];
+      const b = ring[j];
+      if (a.lat > point.lat !== b.lat > point.lat && point.lng < ((b.lng - a.lng) * (point.lat - a.lat)) / (b.lat - a.lat) + a.lng) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+  function outerRings(latlngs) {
+    if (!latlngs.length) return [];
+    if (!Array.isArray(latlngs[0])) return [latlngs];
+    if (!Array.isArray(latlngs[0][0])) return [latlngs[0]];
+    return latlngs.map((polygon) => polygon[0]);
+  }
+  function polygonAt(map, point) {
+    let best = null;
+    let bestSize = Infinity;
+    map.eachLayer((layer) => {
+      if (!(layer instanceof L.Polygon) || !layer.listens('click', true)) return;
+      if (!outerRings(layer.getLatLngs()).some((ring) => ringContains(ring, point))) return;
+      const bounds = layer.getBounds();
+      const size = (bounds.getNorth() - bounds.getSouth()) * (bounds.getEast() - bounds.getWest());
+      if (size < bestSize) {
+        best = layer;
+        bestSize = size; // el más chico: un potrero gana sobre el predio que lo contiene
+      }
+    });
+    return best;
+  }
+
   function create(map, config, options) {
     const opts = options || {};
-    enableFastWheel(map);
+    enableFastWheel(map, () => state.engine === 'google');
     const notice = (message, kind) => {
       if (opts.onNotice) opts.onNotice(message, kind || 'info');
       // Aviso visible sobre el mapa (no se oculta el problema detrás del mapa de respaldo).
@@ -100,7 +133,7 @@
       box.dataset.kind = kind || 'info';
       box.textContent = message;
     };
-    const state = { view: 'normal', engine: 'pending', gmap: null, holder: null };
+    const state = { view: 'normal', engine: 'pending', gmap: null, holder: null, following: false, zoomControl: map.zoomControl };
     const tiles = {
       normal: L.tileLayer(config.tile_url, { attribution: config.attribution, maxZoom: MAX_ZOOM, crossOrigin: true }),
       satellite: L.tileLayer(ESRI_URL, { attribution: ESRI_ATTRIBUTION, maxZoom: MAX_ZOOM, crossOrigin: true }),
@@ -132,48 +165,104 @@
       state.holder = null;
       state.gmap = null;
       state.engine = 'tiles';
-      map.getContainer().classList.remove('has-google-base');
+      map.agroGoogleMaster = false;
+      map.getContainer().classList.remove('has-google-base', 'is-google-zooming');
+      // Leaflet vuelve a manejar los gestos y muestra sus botones + y −.
+      GESTURES.forEach((name) => map[name] && map[name].enable());
+      map.options.zoomSnap = MAP_OPTIONS.zoomSnap;
+      if (state.zoomControl && !state.zoomControl._map) state.zoomControl.addTo(map);
       if (map.attributionControl && !map.attributionControl._map) map.attributionControl.addTo(map);
       apply();
     }
 
-    function sync(center, zoom) {
-      if (!state.gmap || !center || !Number.isFinite(zoom)) return;
-      state.gmap.moveCamera({ center: { lat: center.lat, lng: center.lng }, zoom });
-    }
-
-    function syncFromMap() {
+    // Leaflet → Google: solo cuando el programa mueve el mapa (encuadrar un predio, «Mi ubicación», etc.).
+    function pushToGoogle() {
+      if (!state.gmap || state.following) return;
       try {
-        sync(map.getCenter(), map.getZoom());
+        const center = map.getCenter();
+        state.gmap.moveCamera({ center: { lat: center.lat, lng: center.lng }, zoom: map.getZoom() });
       } catch (error) {
         /* el mapa todavía no tiene vista (se ajusta al cargar la geometría) */
       }
     }
 
+    // Google → Leaflet: los polígonos siguen la cámara de Google mientras la persona mueve o acerca el mapa.
+    function followGoogle() {
+      const center = state.gmap && state.gmap.getCenter();
+      const zoom = state.gmap && state.gmap.getZoom();
+      if (!center || !Number.isFinite(zoom)) return;
+      state.following = true;
+      try {
+        map.setView([center.lat(), center.lng()], zoom, { animate: false });
+      } finally {
+        state.following = false;
+      }
+    }
+
     function useGoogle(maps) {
+      const container = map.getContainer();
       const holder = document.createElement('div');
       holder.className = 'agro-google-base';
-      holder.setAttribute('aria-hidden', 'true');
-      map.getContainer().insertBefore(holder, map.getContainer().firstChild);
+      container.insertBefore(holder, container.firstChild);
       state.holder = holder;
-      state.gmap = new maps.Map(holder, {
-        center: { lat: -33.6866, lng: -71.2167 },
-        zoom: 12,
+      let start = { center: { lat: -33.6866, lng: -71.2167 }, zoom: 12 };
+      try {
+        const center = map.getCenter();
+        start = { center: { lat: center.lat, lng: center.lng }, zoom: map.getZoom() };
+      } catch (error) {
+        /* sin vista todavía */
+      }
+      const mapOptions = {
+        center: start.center,
+        zoom: start.zoom,
         mapTypeId: GOOGLE_TYPES[state.view],
+        // Experiencia oficial de Google Maps: sus gestos, su animación de zoom y sus botones + y −.
         disableDefaultUI: true,
-        gestureHandling: 'none',
-        keyboardShortcuts: false,
+        zoomControl: true,
+        gestureHandling: 'greedy',
         clickableIcons: false,
-        isFractionalZoomEnabled: true,
         maxZoom: MAX_ZOOM,
-      });
+      };
+      if (config.google_map_id) mapOptions.mapId = config.google_map_id; // opcional: mapa vectorial
+      state.gmap = new maps.Map(holder, mapOptions);
       state.engine = 'google';
-      map.getContainer().classList.add('has-google-base');
-      // La atribución la muestra Google en su propia capa.
-      if (map.attributionControl) map.attributionControl.remove();
-      map.on('move zoom zoomend moveend resize viewreset', syncFromMap);
-      map.on('zoomanim', (event) => sync(event.center, event.zoom));
-      syncFromMap();
+      map.agroGoogleMaster = true;
+      container.classList.add('has-google-base');
+
+      // Leaflet deja de procesar gestos y oculta sus botones: solo dibuja encima y sigue a Google.
+      GESTURES.forEach((name) => map[name] && map[name].disable());
+      map.options.zoomSnap = 0; // acepta el zoom intermedio de la animación de Google
+      if (state.zoomControl) state.zoomControl.remove();
+      if (map.attributionControl) map.attributionControl.remove(); // la atribución la muestra Google
+
+      state.gmap.addListener('center_changed', followGoogle);
+      state.gmap.addListener('zoom_changed', () => {
+        // En mapas de teselas Google anima el acercamiento sin informar los pasos intermedios: los polígonos se
+        // ocultan ese instante y reaparecen ya alineados (con zoom continuo no hace falta).
+        if (Number.isInteger(state.gmap.getZoom())) container.classList.add('is-google-zooming');
+        followGoogle();
+      });
+      state.gmap.addListener('idle', () => {
+        container.classList.remove('is-google-zooming');
+        followGoogle();
+      });
+      // Un toque sobre el mapa de Google (no un arrastre) se entrega a las herramientas de dibujo y selección.
+      state.gmap.addListener('click', (event) => {
+        if (!event.latLng) return;
+        const latlng = L.latLng(event.latLng.lat(), event.latLng.lng());
+        const data = {
+          latlng,
+          layerPoint: map.latLngToLayerPoint(latlng),
+          containerPoint: map.latLngToContainerPoint(latlng),
+          originalEvent: event.domEvent,
+          fromGoogle: true,
+        };
+        const polygon = polygonAt(map, latlng);
+        if (polygon) polygon.fire('click', data, true);
+        map.fire('click', data);
+      });
+      map.on('move zoom zoomend moveend resize viewreset', pushToGoogle);
+      pushToGoogle();
       apply();
     }
 

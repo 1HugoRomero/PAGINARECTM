@@ -105,13 +105,16 @@ class GoogleMapsScriptTests(TestCase):
         self.assertIn('@media (pointer: coarse)', css)
         self.assertIn('.agro-google-base', css)
 
-    def test_zoom_agil_sin_animacion_y_una_sola_capa_procesa_los_eventos(self):
+    def test_google_maneja_los_gestos_y_leaflet_solo_lo_sigue(self):
         js = fuente('js', 'agro-basemap.js')
-        self.assertIn(
-            '{ zoomControl: true, zoomAnimation: false, scrollWheelZoom: false, zoomSnap: 1, zoomDelta: 1 }', js
-        )
-        self.assertIn("gestureHandling: 'none'", js)  # Google no procesa rueda ni gestos: solo Leaflet
-        self.assertIn("map.setZoomAround(map.mouseEventToContainerPoint(event), target, { animate: false })", js)
-        self.assertIn('const target = map.getZoom() + direction;', js)  # un nivel por paso
+        self.assertIn("gestureHandling: 'greedy'", js)  # gestos oficiales de Google
+        self.assertIn('zoomControl: true,', js)  # botones + y − de Google
+        self.assertIn("const GESTURES = ['dragging', 'touchZoom', 'doubleClickZoom', 'boxZoom', 'keyboard'];", js)
+        self.assertIn('GESTURES.forEach((name) => map[name] && map[name].disable());', js)  # sin doble proceso
+        self.assertIn("if (isGoogleActive()) return; // la rueda la maneja Google", js)
+        self.assertIn("state.gmap.addListener('center_changed', followGoogle);", js)
+        self.assertIn("map.setView([center.lat(), center.lng()], zoom, { animate: false });", js)
+        self.assertIn('fromGoogle: true,', js)
+        self.assertIn('if (map.agroGoogleMaster && !event.fromGoogle) return;', fuente('js', 'predios-map.js'))
         for archivo in ('predios-map.js', 'predio-detail.js'):
             self.assertIn('window.AgroBasemap.MAP_OPTIONS', fuente('js', archivo))

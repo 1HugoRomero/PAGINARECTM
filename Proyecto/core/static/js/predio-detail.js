@@ -80,7 +80,7 @@
   const zoomChip = document.getElementById('predio-map-zoom');
   if (zoomChip) {
     const showZoom = () => {
-      zoomChip.textContent = 'Zoom ' + map.getZoom();
+      zoomChip.textContent = 'Zoom ' + Math.round(map.getZoom());
       zoomChip.hidden = false;
     };
     map.on('zoomend', showZoom);
