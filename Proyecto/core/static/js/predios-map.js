@@ -1364,7 +1364,7 @@
 
   function showMap() {
     viewBounds = L.latLngBounds([]);
-    map = L.map(mapElement, { zoomControl: true }).setView(
+    map = L.map(mapElement, window.AgroBasemap.MAP_OPTIONS).setView(
       melipillaCenter,
       isCreatingPredio ? NEW_PREDIO_ZOOM : form ? 14 : 11,
     );

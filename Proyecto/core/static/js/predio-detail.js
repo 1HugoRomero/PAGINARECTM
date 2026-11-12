@@ -29,7 +29,7 @@
 
   const geometry = JSON.parse(geometryNode.textContent);
   const config = JSON.parse(configNode.textContent);
-  const map = L.map(mapElement, { zoomControl: true });
+  const map = L.map(mapElement, window.AgroBasemap.MAP_OPTIONS);
   const status = document.getElementById('predio-map-status');
   function showMapStatus(message) {
     if (status) status.textContent = message;

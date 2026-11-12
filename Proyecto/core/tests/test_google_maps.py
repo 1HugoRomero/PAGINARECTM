@@ -104,3 +104,14 @@ class GoogleMapsScriptTests(TestCase):
         self.assertIn('min-height: 48px;', regla)
         self.assertIn('@media (pointer: coarse)', css)
         self.assertIn('.agro-google-base', css)
+
+    def test_zoom_agil_sin_animacion_y_una_sola_capa_procesa_los_eventos(self):
+        js = fuente('js', 'agro-basemap.js')
+        self.assertIn(
+            '{ zoomControl: true, zoomAnimation: false, scrollWheelZoom: false, zoomSnap: 1, zoomDelta: 1 }', js
+        )
+        self.assertIn("gestureHandling: 'none'", js)  # Google no procesa rueda ni gestos: solo Leaflet
+        self.assertIn("map.setZoomAround(map.mouseEventToContainerPoint(event), target, { animate: false })", js)
+        self.assertIn('const target = map.getZoom() + direction;', js)  # un nivel por paso
+        for archivo in ('predios-map.js', 'predio-detail.js'):
+            self.assertIn('window.AgroBasemap.MAP_OPTIONS', fuente('js', archivo))

@@ -53,8 +53,39 @@
     return loader;
   }
 
+  // Opciones del mapa para un zoom ágil. Leaflet es el ÚNICO que procesa la rueda, los botones + y − y los gestos
+  // (la capa de Google tiene gestureHandling 'none' y no recibe eventos), así que nada se procesa dos veces.
+  // - zoomAnimation false: cada cambio de nivel es inmediato y los polígonos y el fondo de Google cambian a la vez
+  //   (antes los polígonos se animaban 250 ms mientras Google saltaba de inmediato).
+  // - scrollWheelZoom false: la rueda la maneja enableFastWheel (abajo), un nivel por paso y sin acumulación.
+  const MAP_OPTIONS = { zoomControl: true, zoomAnimation: false, scrollWheelZoom: false, zoomSnap: 1, zoomDelta: 1 };
+  const WHEEL_STEP_MS = 70; // tiempo mínimo entre dos niveles de zoom con la rueda
+  const WHEEL_STEP_DELTA = 50; // desplazamiento de rueda (px) que equivale a un nivel
+
+  function enableFastWheel(map) {
+    const container = map.getContainer();
+    let pending = 0;
+    let lastStep = 0;
+    L.DomEvent.on(container, 'wheel', (event) => {
+      L.DomEvent.preventDefault(event); // la rueda sobre el mapa hace zoom, no desplaza la página
+      pending += L.DomEvent.getWheelDelta(event);
+      // Sin retrasos acumulados: lo que llega mientras se espera el siguiente paso no se guarda para después.
+      pending = Math.max(-WHEEL_STEP_DELTA, Math.min(WHEEL_STEP_DELTA, pending));
+      const now = Date.now();
+      if (Math.abs(pending) < WHEEL_STEP_DELTA || now - lastStep < WHEEL_STEP_MS) return;
+      const direction = pending > 0 ? 1 : -1;
+      pending = 0;
+      const target = map.getZoom() + direction;
+      if (target < map.getMinZoom() || target > map.getMaxZoom()) return;
+      lastStep = now;
+      // El punto bajo el cursor se mantiene en su lugar.
+      map.setZoomAround(map.mouseEventToContainerPoint(event), target, { animate: false });
+    });
+  }
+
   function create(map, config, options) {
     const opts = options || {};
+    enableFastWheel(map);
     const notice = (message, kind) => {
       if (opts.onNotice) opts.onNotice(message, kind || 'info');
       // Aviso visible sobre el mapa (no se oculta el problema detrás del mapa de respaldo).
@@ -202,5 +233,5 @@
     };
   }
 
-  window.AgroBasemap = { create };
+  window.AgroBasemap = { create, MAP_OPTIONS };
 })();
