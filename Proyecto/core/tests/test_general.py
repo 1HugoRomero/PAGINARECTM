@@ -3217,7 +3217,7 @@ class PredioPotreroFlowAndPrivacyTests(TestCase):
         self.assertIn('resetNewPredioState', source)
         self.assertIn("if (!form || isPredioForm) return;", source)
         self.assertIn("fitBounds(layerBounds(currentLayer), { padding: [56, 56], maxZoom: 17 })", source)
-        self.assertIn("['Normal', normalTiles], ['Satélite', satelliteTiles]", re.sub(r'\s+', ' ', source))
+        self.assertIn("['Normal', 'normal'], ['Satélite', 'satellite']", re.sub(r'\s+', ' ', source))
         self.assertNotIn('localStorage', source)
         self.assertNotIn('sessionStorage', source)
 

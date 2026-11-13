@@ -152,7 +152,13 @@ def build_menu(request, current):
 
 
 def map_config():
-    return {'tile_url': settings.MAP_TILE_URL, 'attribution': settings.MAP_TILE_ATTRIBUTION}
+    return {
+        'tile_url': settings.MAP_TILE_URL,
+        'attribution': settings.MAP_TILE_ATTRIBUTION,
+        # Clave pública del navegador de Google Maps (se protege con restricciones de sitio en Google Cloud).
+        'google_maps_key': settings.GOOGLE_MAPS_API_KEY,
+        'debug': settings.DEBUG,
+    }
 
 
 def _task_summary(user, today):

@@ -28,6 +28,8 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      # Google Maps JavaScript API (mapa de predios): se lee del .env, nunca se escribe aquí.
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-${VITE_GOOGLE_MAPS_API_KEY:-}}
     volumes:
       - agroasesor_data:/data   # LA base de datos oficial (SQLite persistente)
       - ./backups:/backups      # respaldos automáticos (visibles en tu PC)
