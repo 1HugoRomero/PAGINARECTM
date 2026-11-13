@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>AgroAsesor API · Consola</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0f1b2d; --text: #334155; --muted: #64748b; --line: #e6eaee; --bg: #f6f8f7;
+            --green: #0b6b4b; --green-2: #095a3f; --mint: #e6f7ef; --mint-line: #a9e4c9;
+            --amber: #b45309; --amber-bg: #fff4e2; --red: #b42318; --red-bg: #fdecea;
+            --blue: #1d4ed8; --blue-bg: #e8efff; --code: #0f1b2d;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: Outfit, "Segoe UI", system-ui, sans-serif; }
+        button, input, select, textarea { font: inherit; }
+        a { color: var(--green); }
+        .top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px; padding: 14px clamp(16px, 4vw, 40px); border-bottom: 1px solid var(--line); background: #fff; }
+        .logo { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--green); color: #fff; font-size: 20px; }
+        .brand strong { display: block; color: var(--ink); font-size: 1.1rem; font-weight: 600; }
+        .brand small { color: var(--muted); font-size: .8rem; }
+        .status { display: flex; align-items: center; gap: 8px; margin-left: auto; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; font-size: .85rem; }
+        .dot { width: 9px; height: 9px; border-radius: 50%; background: #cbd5e1; }
+        .dot.ok { background: #10b981; } .dot.warn { background: #f59e0b; }
+        .top nav { display: flex; gap: 6px; }
+        .top nav a { padding: 7px 11px; border-radius: 10px; color: var(--text); font-size: .9rem; text-decoration: none; }
+        .top nav a:hover { background: #f1f5f9; }
+        main { max-width: 1320px; margin: 0 auto; padding: 26px clamp(16px, 4vw, 40px) 60px; }
+        .hero h1 { margin: 6px 0 6px; color: var(--ink); font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.3rem); font-weight: 600; letter-spacing: -.02em; }
+        .hero p { max-width: 820px; margin: 0; color: var(--muted); font-weight: 300; font-size: 1.02rem; line-height: 1.5; }
+        .kicker { color: #047857; font-size: .74rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+        .note { margin: 18px 0 22px; padding: 12px 16px; border: 1px solid #fde9c8; border-radius: 14px; background: var(--amber-bg); color: #7c4a03; font-size: .9rem; line-height: 1.45; }
+        .card { border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(15,27,45,.04), 0 8px 24px rgba(15,27,45,.04); }
+        .grid { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+        .grid > * { min-width: 0; }
+        .endpoints { padding: 10px; max-height: calc(100vh - 120px); overflow: auto; position: sticky; top: 84px; }
+        .group { margin: 10px 8px 6px; color: var(--muted); font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+        .ep { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 2px 10px; width: 100%; padding: 10px; border: 1px solid transparent; border-radius: 12px; background: none; color: var(--ink); text-align: left; cursor: pointer; }
+        .ep:hover { background: #f8fafc; }
+        .ep.is-active { border-color: var(--mint-line); background: var(--mint); }
+        .ep code { font-size: .82rem; overflow-wrap: anywhere; }
+        .ep span.sum { grid-column: 2; color: var(--muted); font-size: .78rem; line-height: 1.3; }
+        .m { display: inline-grid; place-items: center; height: 22px; border-radius: 6px; font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
+        .m.get { background: var(--blue-bg); color: var(--blue); } .m.post { background: var(--mint); color: var(--green); }
+        .tester { padding: 22px; }
+        .tester h2 { margin: 0 0 4px; color: var(--ink); font-size: 1.25rem; font-weight: 600; }
+        .tester .desc { margin: 0 0 16px; color: var(--muted); font-weight: 300; }
+        .req { display: flex; gap: 8px; align-items: stretch; }
+        .req .m { height: auto; padding: 0 12px; font-size: .78rem; }
+        .req input { flex: 1; min-width: 0; height: 46px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: #f8fafc; font-family: ui-monospace, Consolas, monospace; font-size: .9rem; }
+        .btn { height: 46px; padding: 0 20px; border: 0; border-radius: 12px; background: var(--green); color: #fff; font-weight: 600; cursor: pointer; }
+        .btn:hover { background: var(--green-2); }
+        .btn.ghost { border: 1px solid var(--line); background: #fff; color: var(--ink); }
+        .params { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 14px; }
+        .params label { display: grid; gap: 6px; color: var(--ink); font-size: .82rem; font-weight: 500; }
+        .params input, .params select { height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+        textarea { width: 100%; min-height: 150px; margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #f8fafc; font-family: ui-monospace, Consolas, monospace; font-size: .85rem; resize: vertical; }
+        .label { display: block; margin-top: 16px; color: var(--ink); font-size: .85rem; font-weight: 500; }
+        .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .resp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 22px 0 8px; }
+        .code { padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: .85rem; }
+        .code.ok { background: var(--mint); color: var(--green); } .code.err { background: var(--red-bg); color: var(--red); } .code.wait { background: #f1f5f9; color: var(--muted); }
+        .meta { color: var(--muted); font-size: .85rem; }
+        pre { margin: 0; max-height: 520px; overflow: auto; padding: 16px; border-radius: 14px; background: var(--code); color: #e2e8f0; font-size: .82rem; line-height: 1.5; }
+        pre .k { color: #93c5fd; } pre .s { color: #86efac; } pre .n { color: #fcd34d; } pre .b { color: #f9a8d4; }
+        .curl { margin-top: 10px; padding: 10px 14px; border-radius: 10px; background: #f1f5f9; font-family: ui-monospace, Consolas, monospace; font-size: .78rem; overflow-wrap: anywhere; }
+        .section { margin-top: 34px; }
+        .section h2 { margin: 6px 0 4px; color: var(--ink); font-size: 1.5rem; font-weight: 600; }
+        .section > p { margin: 0 0 16px; color: var(--muted); font-weight: 300; }
+        .ferts { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+        .fert { padding: 16px; }
+        .fert h3 { margin: 0; color: var(--ink); font-size: 1.02rem; font-weight: 600; }
+        .fert .f { color: var(--muted); font-size: .82rem; font-family: ui-monospace, Consolas, monospace; }
+        .grade { margin: 10px 0 8px; color: var(--green); font-size: 1rem; font-weight: 600; }
+        .bars { display: grid; gap: 6px; }
+        .bar { display: grid; grid-template-columns: 40px 1fr 78px; align-items: center; gap: 8px; font-size: .78rem; }
+        .bar .t { height: 8px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+        .bar .t span { display: block; height: 100%; border-radius: inherit; background: var(--green); }
+        .bar b { text-align: right; color: var(--ink); font-weight: 600; }
+        .bar.is-na span:first-child, .bar.is-na b { color: #94a3b8; font-weight: 400; }
+        .tag { display: inline-block; margin-top: 10px; padding: 3px 9px; border-radius: 999px; font-size: .72rem; font-weight: 600; }
+        .tag.ok { background: var(--mint); color: var(--green); } .tag.warn { background: var(--amber-bg); color: var(--amber); }
+        .src { display: block; margin-top: 6px; color: var(--muted); font-size: .76rem; }
+        .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+        .chip { padding: 7px 13px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--text); cursor: pointer; font-size: .86rem; }
+        .chip.is-active { border-color: var(--green); background: var(--mint); color: var(--green); font-weight: 600; }
+        footer { margin-top: 36px; color: var(--muted); font-size: .8rem; line-height: 1.5; }
+        @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } .brand small { display: none; } .req { flex-wrap: wrap; } .req input { flex-basis: 100%; order: 3; } .endpoints { position: static; max-height: none; } .top nav { display: none; } }
+    </style>
+</head>
+<body>
+<header class="top">
+    <span class="logo" aria-hidden="true">🌱</span>
+    <div class="brand"><strong>AgroAsesor API</strong><small>v1 · consola de pruebas</small></div>
+    <nav><a href="#probar">Probar endpoints</a><a href="#fertilizantes">Fertilizantes</a><a href="/catalogo">Catálogo</a><a href="/api/v1/openapi.json" target="_blank" rel="noopener">OpenAPI</a></nav>
+    <div class="status" id="status"><span class="dot"></span><span>Comprobando…</span></div>
+</header>
+<main>
+    <div class="hero">
+        <span class="kicker">API REST · JSON</span>
+        <h1>Consola de la API de AgroAsesor</h1>
+        <p>Elige un endpoint, ajusta los datos y envía la petición para ver la respuesta real de la API. Los datos de fertilizantes vienen de la guía FAO/IFA <em>Los fertilizantes y su uso</em> (2002) y la normativa de la Resolución SAG 8.651 exenta de 2024, con el cuadro y la página de donde se tomó cada valor.</p>
+    </div>
+    <div class="note"><b>Información orientativa.</b> La composición es la de referencia publicada; el valor que vale es el que declara la etiqueta de cada producto. La API no recomienda dosis: el requerimiento de nutriente lo indicas tú a partir de tu análisis de suelo o asesoría técnica.</div>
+
+    <div class="grid" id="probar">
+        <aside class="card endpoints" id="endpoints" aria-label="Endpoints disponibles"></aside>
+        <section class="card tester" aria-live="polite">
+            <h2 id="t-title"></h2>
+            <p class="desc" id="t-desc"></p>
+            <div class="req"><span class="m" id="t-method"></span><input id="t-url" aria-label="URL de la petición" spellcheck="false"><button class="btn" id="t-send" type="button">Enviar</button></div>
+            <div class="params" id="t-params"></div>
+            <label class="label" id="t-body-label" for="t-body">Cuerpo JSON</label>
+            <textarea id="t-body" spellcheck="false"></textarea>
+            <div class="resp-head"><strong style="color:var(--ink)">Respuesta</strong><span class="code wait" id="r-code">Sin enviar</span><span class="meta" id="r-meta"></span><button class="btn ghost" id="r-copy" type="button" style="height:34px;margin-left:auto">Copiar curl</button></div>
+            <pre id="r-body">Presiona «Enviar» para ver la respuesta.</pre>
+            <div class="curl" id="r-curl"></div>
+        </section>
+    </div>
+
+    <section class="section" id="fertilizantes">
+        <span class="kicker">Datos servidos por la API</span>
+        <h2>Fertilizantes y su composición</h2>
+        <p>Composición <b>referencial</b> en % de N, P₂O₅, K₂O, MgO y S, por separado. «no inf.» = la fuente no lo informa (no es 0). * MgO calculado desde el Mg que informa la fuente. Para tu producto vale lo que declara su etiqueta.</p>
+        <div class="filters" id="f-filters"></div>
+        <div class="ferts" id="f-grid"></div>
+    </section>
+
+    <footer>
+        Fuentes: <a href="https://www.fertilizer.org/wp-content/uploads/2023/01/2002_IFA_FAO_fertilizantesuso.pdf" target="_blank" rel="noopener">FAO/IFA, Los fertilizantes y su uso (2002)</a> ·
+        <a href="https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/18/44027/01/2585124.pdf" target="_blank" rel="noopener">Resolución SAG N° 8.651 exenta (Diario Oficial, 18-12-2024)</a>.
+        Los enlaces son a las publicaciones originales; no implican respaldo de esas instituciones a AgroAsesor.
+    </footer>
+</main>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const make = (tag, text, cls) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (cls) n.className = cls; return n; };
+
+// Endpoints que se pueden probar desde la consola (solo los públicos: no requieren sesión).
+const ENDPOINTS = [
+  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/fertilizantes', s: 'Lista de fertilizantes con composición y fuente',
+    q: [{ n: 'nutriente', o: ['', 'N', 'P2O5', 'K2O', 'MgO', 'S'] }, { n: 'grupo', o: ['', 'nitrogenados', 'fosfatados', 'potasicos', 'magnesio', 'azufrados', 'multinutrientes'] }, { n: 'q', v: '' }] },
+  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/fertilizantes/{id}', s: 'Ficha de un fertilizante', path: { id: 'superfosfato-simple' } },
+  { g: 'Fertilizantes', m: 'POST', p: '/api/v1/catalogo/calcular-fertilizante', s: 'Kilos de producto para cubrir un requerimiento de nutriente',
+    body: { fertilizante_id: 'urea', nutriente: 'N', requerimiento_kg_ha: 92, superficie_ha: 2.5, ley_declarada_pct: 46, peso_saco_kg: 25 } },
+  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/convertir', s: 'Convierte P₂O₅↔P o K₂O↔K (factores FAO)',
+    q: [{ n: 'de', o: ['P2O5', 'P', 'K2O', 'K'] }, { n: 'a', o: ['P', 'P2O5', 'K', 'K2O'] }, { n: 'valor', v: '46' }] },
+  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/conversiones', s: 'Factores de conversión con su fuente' },
+  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/normativa/contenidos-minimos', s: 'Categorías, mínimos y requisitos (Res. SAG 8.651/2024)' },
+  { g: 'Fertilizantes', m: 'POST', p: '/api/v1/catalogo/revisar-etiqueta', s: 'Revisa los contenidos mínimos de una etiqueta (Res. SAG 8.651)', body: { categoria: 'mezcla', nutrientes: { N: 15, P2O5: 15, K2O: 15 }, contiene_urea: true, biuret_pct: 0.9 } },
+  { g: 'Fertilizantes', m: 'GET', p: '/api/v1/catalogo/fertilizantes/resumen', s: 'Fuentes, nutrientes y grupos del catálogo' },
+  { g: 'Catálogo agrícola', m: 'GET', p: '/api/v1/catalogo/productos', s: 'Insumos con fuentes SAG/INIA/ODEPA', q: [{ n: 'categoria', o: ['', 'semillas', 'fertilizantes', 'fungicidas', 'insecticidas', 'herbicidas', 'repelentes'] }, { n: 'q', v: '' }] },
+  { g: 'Catálogo agrícola', m: 'GET', p: '/api/v1/catalogo/referencias-siembra', s: 'Rangos de siembra documentados por INIA' },
+  { g: 'Catálogo agrícola', m: 'POST', p: '/api/v1/catalogo/calcular-sacos', s: 'Sacos de semilla según referencia INIA',
+    body: { referencia_id: 'trigo-invierno', superficie_ha: 1.5, peso_saco_kg: 25, dosis_kg_ha: 180 } },
+  { g: 'Catálogo agrícola', m: 'GET', p: '/api/v1/catalogo/fuentes', s: 'Fuentes institucionales del catálogo' },
+  { g: 'Sistema', m: 'GET', p: '/api/v1/health', s: 'Estado del servicio' },
+];
+
+let current = null;
+
+function buildUrl(ep) {
+  let path = ep.p;
+  for (const [k] of Object.entries(ep.path || {})) path = path.replace('{' + k + '}', encodeURIComponent($('pp-' + k).value.trim()));
+  const qs = new URLSearchParams();
+  for (const q of ep.q || []) { const v = $('qp-' + q.n).value.trim(); if (v) qs.set(q.n, v); }
+  return path + (qs.toString() ? '?' + qs : '');
+}
+
+function field(id, name, def, options) {
+  const label = make('label', name);
+  let input;
+  if (options) { input = make('select'); for (const o of options) { const opt = make('option', o || '(todos)'); opt.value = o; input.append(opt); } }
+  else { input = make('input'); input.value = def ?? ''; }
+  input.id = id;
+  input.addEventListener('input', () => { $('t-url').value = buildUrl(current); });
+  label.append(input);
+  return label;
+}
+
+function select(ep, button) {
+  current = ep;
+  document.querySelectorAll('.ep').forEach((b) => b.classList.toggle('is-active', b === button));
+  $('t-title').textContent = ep.m + ' ' + ep.p;
+  $('t-desc').textContent = ep.s;
+  const method = $('t-method'); method.textContent = ep.m; method.className = 'm ' + ep.m.toLowerCase();
+  const params = $('t-params'); params.replaceChildren();
+  for (const [k, v] of Object.entries(ep.path || {})) params.append(field('pp-' + k, k + ' (ruta)', v));
+  for (const q of ep.q || []) params.append(field('qp-' + q.n, q.n, q.v, q.o));
+  const hasBody = ep.m === 'POST';
+  $('t-body').hidden = $('t-body-label').hidden = !hasBody;
+  $('t-body').value = hasBody ? JSON.stringify(ep.body || {}, null, 2) : '';
+  $('t-url').value = buildUrl(ep);
+  $('r-code').textContent = 'Sin enviar'; $('r-code').className = 'code wait'; $('r-meta').textContent = '';
+  $('r-body').textContent = 'Presiona «Enviar» para ver la respuesta.';
+  $('r-curl').textContent = curl();
+}
+
+function curl() {
+  const url = location.origin + $('t-url').value;
+  if (current.m === 'GET') return 'curl "' + url + '"';
+  return 'curl -X POST "' + url + "\" -H 'Content-Type: application/json' -d '" + $('t-body').value.replace(/\s+/g, ' ') + "'";
+}
+
+function highlight(json) {
+  const esc = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return esc.replace(/("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (m) => {
+    let cls = 'n';
+    if (/^"/.test(m)) cls = /:$/.test(m) ? 'k' : 's'; else if (/true|false|null/.test(m)) cls = 'b';
+    return '<span class="' + cls + '">' + m + '</span>';
+  });
+}
+
+async function send() {
+  const opts = { method: current.m, headers: {} };
+  if (current.m === 'POST') {
+    try { JSON.parse($('t-body').value); } catch (e) { $('r-code').textContent = 'JSON inválido'; $('r-code').className = 'code err'; $('r-body').textContent = e.message; return; }
+    opts.headers['Content-Type'] = 'application/json'; opts.body = $('t-body').value;
+  }
+  $('r-code').textContent = 'Enviando…'; $('r-code').className = 'code wait';
+  const t0 = performance.now();
+  try {
+    const r = await fetch($('t-url').value, opts);
+    const ms = Math.round(performance.now() - t0);
+    const text = await r.text();
+    let pretty = text;
+    try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch (e) { /* no es JSON */ }
+    $('r-code').textContent = r.status + ' ' + (r.statusText || ''); $('r-code').className = 'code ' + (r.ok ? 'ok' : 'err');
+    $('r-meta').textContent = ms + ' ms · ' + (r.headers.get('content-type') || '') + ' · ' + new Blob([text]).size + ' bytes';
+    $('r-body').innerHTML = highlight(pretty);
+  } catch (e) {
+    $('r-code').textContent = 'Sin conexión'; $('r-code').className = 'code err'; $('r-body').textContent = e.message;
+  }
+  $('r-curl').textContent = curl();
+}
+
+function renderEndpoints() {
+  const box = $('endpoints'); let group = '';
+  ENDPOINTS.forEach((ep, i) => {
+    if (ep.g !== group) { group = ep.g; box.append(make('div', group, 'group')); }
+    const b = make('button', null, 'ep'); b.type = 'button';
+    b.append(make('span', ep.m, 'm ' + ep.m.toLowerCase()), make('code', ep.p.replace('/api/v1', '')), make('span', ep.s, 'sum'));
+    b.addEventListener('click', () => select(ep, b));
+    box.append(b);
+    if (i === 0) select(ep, b);
+  });
+}
+
+// Tarjetas de fertilizantes con el grado N-P2O5-K2O.
+let allFerts = [];
+function fmt(v) { return String(v).replace('.', ','); }
+function renderFerts(grupo) {
+  const grid = $('f-grid'); grid.replaceChildren();
+  for (const f of allFerts.filter((x) => !grupo || x.grupo === grupo)) {
+    const c = make('article', null, 'card fert');
+    c.append(make('h3', f.nombre), make('div', f.formula || 'Fórmula no indicada en la fuente', 'f'), make('div', f.grado.texto, 'grade'));
+    const bars = make('div', null, 'bars');
+    for (const [k, v] of Object.entries(f.composicion_referencial)) {
+      const row = make('div', null, 'bar' + (v.informado_en_fuente ? '' : ' is-na')); const t = make('div', null, 't'); const s = make('span');
+      s.style.width = (v.informado_en_fuente ? v.max_pct : 0) + '%'; t.append(s);
+      row.append(make('span', k), t, make('b', v.informado_en_fuente ? v.texto + (v.origen === 'calculado' ? '*' : '') : 'no inf.'));
+      if (v.origen === 'calculado') row.title = v.calculo + ' (la fuente da Mg ' + v.valor_en_fuente.Mg_pct + ' %)';
+      bars.append(row);
+    }
+    c.append(bars);
+    c.append(make('span', f.estado_verificacion === 'cotejada_con_fuente' ? 'Cotejado con la fuente' : 'Confirmar con etiqueta', 'tag ' + (f.estado_verificacion === 'cotejada_con_fuente' ? 'ok' : 'warn')));
+    c.append(make('span', f.fuente.organismo + ' · ' + f.ubicacion_en_fuente, 'src'));
+    grid.append(c);
+  }
+}
+
+async function loadFerts() {
+  try {
+    const [lista, resumen] = await Promise.all([
+      fetch('/api/v1/catalogo/fertilizantes').then((r) => r.json()),
+      fetch('/api/v1/catalogo/fertilizantes/resumen').then((r) => r.json()),
+    ]);
+    allFerts = lista.resultados;
+    const filters = $('f-filters');
+    const chips = [{ id: '', nombre: 'Todos (' + allFerts.length + ')' }, ...resumen.grupos];
+    for (const g of chips) {
+      const b = make('button', g.nombre, 'chip' + (g.id === '' ? ' is-active' : '')); b.type = 'button';
+      b.addEventListener('click', () => { filters.querySelectorAll('.chip').forEach((x) => x.classList.toggle('is-active', x === b)); renderFerts(g.id); });
+      filters.append(b);
+    }
+    renderFerts('');
+  } catch (e) { $('f-grid').textContent = 'No se pudieron cargar los fertilizantes: ' + e.message; }
+}
+
+async function health() {
+  const box = $('status');
+  try {
+    const r = await fetch('/api/v1/catalogo/fertilizantes/resumen');
+    const ok = r.ok;
+    box.querySelector('.dot').className = 'dot ' + (ok ? 'ok' : 'warn');
+    box.lastElementChild.textContent = ok ? 'API en línea' : 'API con problemas';
+  } catch (e) { box.querySelector('.dot').className = 'dot warn'; box.lastElementChild.textContent = 'Sin conexión'; }
+}
+
+$('t-send').addEventListener('click', send);
+$('t-url').addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+$('t-body').addEventListener('input', () => { $('r-curl').textContent = curl(); });
+$('r-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(curl()); $('r-copy').textContent = 'Copiado'; setTimeout(() => { $('r-copy').textContent = 'Copiar curl'; }, 1500); } catch (e) { /* sin permiso de portapapeles */ } });
+renderEndpoints();
+loadFerts();
+health();
+</script>
+</body>
+</html>

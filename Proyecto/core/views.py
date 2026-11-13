@@ -48,6 +48,7 @@ from .seasons import (
 )
 from .agronomy import evaluate_harvest_date, evaluate_sowing_date, find_reference
 from .geometry import coordinates_from_geojson
+from .google_auth import google_configurado, google_login_url
 from .forms import (
     UNIDADES_DOSIS,
     ActividadAgricolaForm,
@@ -151,7 +152,13 @@ def build_menu(request, current):
 
 
 def map_config():
-    return {'tile_url': settings.MAP_TILE_URL, 'attribution': settings.MAP_TILE_ATTRIBUTION}
+    return {
+        'tile_url': settings.MAP_TILE_URL,
+        'attribution': settings.MAP_TILE_ATTRIBUTION,
+        # Clave pública del navegador de Google Maps (se protege con restricciones de sitio en Google Cloud).
+        'google_maps_key': settings.GOOGLE_MAPS_API_KEY,
+        'debug': settings.DEBUG,
+    }
 
 
 def _task_summary(user, today):
@@ -788,10 +795,12 @@ def login_view(request):
             'error': error,
             'registration_form': registration,
             'identifier': identifier,
+            'google_login_url': google_login_url(),
+            'google_configurado': google_configurado(),
             'headline': (
                 'Optimiza tus decisiones agrícolas con datos reales de tu campo.'
                 if mode == 'login'
-                else 'Registra tu cuenta de agricultor.'
+                else 'Únete a la red de agricultores líderes de la provincia de Melipilla.'
             ),
         },
     )

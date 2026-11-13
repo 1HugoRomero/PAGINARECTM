@@ -1,0 +1,106 @@
+/* Mapa de predios: capa base de Google Maps, avisos y modos táctiles (se carga después de predios.css). */
+
+/* ---------- Mapa base de Google Maps (debajo de las capas de dibujo) ---------- */
+
+.agro-google-base {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+/* Con Google activo, los gestos (arrastrar, rueda, dos dedos) llegan a Google aunque empiecen sobre un polígono;
+   los toques sobre predios y potreros los entrega agro-basemap.js. Los vértices de edición siguen siendo arrastrables. */
+.leaflet-container.has-google-base .leaflet-overlay-pane svg path.leaflet-interactive {
+    pointer-events: none !important;
+}
+
+/* Durante la animación de zoom de Google los polígonos se ocultan un instante y reaparecen ya alineados. */
+.leaflet-container.is-google-zooming .leaflet-overlay-pane,
+.leaflet-container.is-google-zooming .leaflet-marker-pane,
+.leaflet-container.is-google-zooming .leaflet-tooltip-pane {
+    opacity: 0;
+}
+
+.leaflet-container.has-google-base .leaflet-overlay-pane,
+.leaflet-container.has-google-base .leaflet-marker-pane,
+.leaflet-container.has-google-base .leaflet-tooltip-pane {
+    transition: opacity .12s ease;
+}
+
+.leaflet-container.has-google-base {
+    background: #e8ece9;
+}
+
+/* Aviso visible cuando Google Maps no está configurado o rechaza la clave */
+.map-base-notice {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    z-index: 1000;
+    margin: 0;
+    padding: 9px 12px;
+    border: 1px solid #f0d58a;
+    border-radius: 10px;
+    background: #fff8e1;
+    color: #6b4e00;
+    font-size: .8rem;
+    line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(30, 45, 32, .18);
+}
+
+.map-base-notice[data-kind="error"] {
+    border-color: #f5c2bc;
+    background: #fef3f2;
+    color: #b42318;
+}
+
+/* Modos «Dibujar / Mover mapa» mientras se marca el perímetro (botones grandes para el dedo) */
+.map-draw-mode {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid rgba(42, 58, 45, .16);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(30, 45, 32, .2);
+}
+
+.map-draw-mode button {
+    min-height: 48px;
+    min-width: 96px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--green-dark);
+    font: inherit;
+    font-size: .92rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.map-draw-mode button.is-active {
+    background: var(--green, #0b6b4b);
+    color: #fff;
+}
+
+.leaflet-container.is-pan-mode {
+    cursor: grab;
+}
+
+/* Vértices de edición más grandes en pantallas táctiles */
+@media (pointer: coarse) {
+    .leaflet-container .marker-icon,
+    .leaflet-container .marker-icon-middle {
+        width: 26px !important;
+        height: 26px !important;
+        margin-left: -13px !important;
+        margin-top: -13px !important;
+    }
+
+    .map-view-switch button {
+        min-height: 44px;
+        padding: 9px 14px;
+    }
+}

@@ -1,8 +1,9 @@
 def test_health_sin_base_configurada(client):
+    """Sin base configurada el servicio no está listo: health responde 503 (así lo implementa health.py)."""
     response = client.get("/api/v1/health")
-    assert response.status_code == 200
+    assert response.status_code == 503
     body = response.get_json()
-    assert body["status"] == "ok"
+    assert body["status"] == "error"
     assert body["base_datos"] == "no_configurada"
 
 

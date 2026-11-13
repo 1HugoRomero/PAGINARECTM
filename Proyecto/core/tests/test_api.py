@@ -8,19 +8,56 @@ import sqlite3
 import sys
 import tempfile
 import threading
+from io import StringIO
 from pathlib import Path
 from unittest import SkipTest, mock
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.db import connection
 from django.test import Client, TestCase, override_settings
 
 from core import api_gateway
-from core.models import Agricultor, Predio, Potrero
+from core.models import Agricultor, Cultivo, Predio, Potrero
 
 SECRETO = "t" * 40
 RAIZ_FLASK = Path(settings.BASE_DIR) / "backend_flask"
+
+
+def _flask_o_saltar(cls):
+    try:
+        if str(RAIZ_FLASK) not in sys.path:
+            sys.path.append(str(RAIZ_FLASK))
+        from app import create_app
+        from werkzeug.serving import make_server
+    except Exception as e:  # Flask no instalado en este entorno
+        raise SkipTest(f"Flask no disponible: {e}")
+    cls._create_app = staticmethod(create_app)
+    cls._make_server = staticmethod(make_server)
+
+
+def _levantar_flask(test):
+    """Copia la base de PRUEBAS (con lo creado hasta ahora) y levanta Flask sobre esa copia en un hilo."""
+    test.carpeta = tempfile.TemporaryDirectory()
+    copia = Path(test.carpeta.name) / "copia.sqlite3"
+    destino = sqlite3.connect(copia)
+    connection.ensure_connection()
+    # iterdump evita backup(), que se bloquea con la base en memoria compartida de las pruebas mientras hay una
+    # transacción abierta.
+    destino.executescript("\n".join(connection.connection.iterdump()))
+    destino.close()
+    app = test._create_app({"TESTING": True, "AGROASESOR_DB_PATH": str(copia), "AGROASESOR_INTERNAL_SECRET": SECRETO})
+    test.servidor = test._make_server("127.0.0.1", 0, app)
+    test.hilo = threading.Thread(target=test.servidor.serve_forever, daemon=True)
+    test.hilo.start()
+    test.url = f"http://127.0.0.1:{test.servidor.server_port}"
+
+
+def _detener_flask(test):
+    test.servidor.shutdown()
+    test.hilo.join(5)
+    test.carpeta.cleanup()
 
 
 class FirmaTests(TestCase):
@@ -109,15 +146,7 @@ class PuertaDeEnlaceConFlaskTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        try:
-            if str(RAIZ_FLASK) not in sys.path:
-                sys.path.append(str(RAIZ_FLASK))
-            from app import create_app  # noqa: F401
-            from werkzeug.serving import make_server  # noqa: F401
-        except Exception as e:  # Flask no instalado en este entorno
-            raise SkipTest(f"Flask no disponible: {e}")
-        cls._create_app = staticmethod(create_app)
-        cls._make_server = staticmethod(make_server)
+        _flask_o_saltar(cls)
 
     def setUp(self):
         User = get_user_model()
@@ -134,27 +163,10 @@ class PuertaDeEnlaceConFlaskTests(TestCase):
         self.pot_ana = Potrero.objects.create(predio=p_ana, nombre="Norte", superficie_ha="1.5", perimetro=[])
         self.pot_luis = Potrero.objects.create(predio=p_luis, nombre="Sur", superficie_ha="2", perimetro=[])
         self.predio_luis = p_luis
-
-        self.carpeta = tempfile.TemporaryDirectory()
-        copia = Path(self.carpeta.name) / "copia.sqlite3"
-        destino = sqlite3.connect(copia)
-        connection.ensure_connection()
-        # Copia de la base de PRUEBAS (incluye lo recién creado). iterdump evita backup(), que se bloquea con la
-        # base en memoria compartida de las pruebas mientras hay una transacción abierta.
-        destino.executescript("\n".join(connection.connection.iterdump()))
-        destino.close()
-        app = self._create_app(
-            {"TESTING": True, "AGROASESOR_DB_PATH": str(copia), "AGROASESOR_INTERNAL_SECRET": SECRETO}
-        )
-        self.servidor = self._make_server("127.0.0.1", 0, app)
-        self.hilo = threading.Thread(target=self.servidor.serve_forever, daemon=True)
-        self.hilo.start()
-        self.url = f"http://127.0.0.1:{self.servidor.server_port}"
+        _levantar_flask(self)
 
     def tearDown(self):
-        self.servidor.shutdown()
-        self.hilo.join(5)
-        self.carpeta.cleanup()
+        _detener_flask(self)
 
     def _cliente(self, usuario=None):
         c = Client()
@@ -214,3 +226,95 @@ class PuertaDeEnlaceConFlaskTests(TestCase):
             r = self._cliente().get("/api/v1/openapi.json")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()["openapi"], "3.0.3")
+
+    # --- Catálogo de fertilizantes a través de Django (integración real Django → Flask) ---
+
+    def test_fertilizantes_publicos_por_django_sin_sesion(self):
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            r = self._cliente().get("/api/v1/catalogo/fertilizantes/superfosfato-simple")
+        self.assertEqual(r.status_code, 200)
+        comp = r.json()["composicion_referencial"]
+        self.assertEqual((comp["P2O5"]["min_pct"], comp["P2O5"]["max_pct"]), (16, 20))
+        self.assertEqual(comp["K2O"]["max_pct"], 0)
+        self.assertEqual(comp["S"]["min_pct"], 12)
+        self.assertEqual(r.json()["fuente"]["organismo"], "FAO / IFA")
+
+    def test_calculo_de_fertilizante_exige_sesion_y_calcula_por_django(self):
+        cuerpo = '{"fertilizante_id": "urea", "nutriente": "N", "requerimiento_kg_ha": 92, "superficie_ha": 2, "ley_declarada_pct": 46}'
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            anonimo = self._cliente().post("/api/v1/catalogo/calcular-fertilizante", cuerpo, content_type="application/json")
+            r = self._cliente(self.ana).post("/api/v1/catalogo/calcular-fertilizante", cuerpo, content_type="application/json")
+        self.assertEqual(anonimo.status_code, 401)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()["producto_total_kg"], {"min": 400.0, "max": 400.0})
+        self.assertEqual(r.json()["ley"]["tipo"], "declarada_en_etiqueta")
+
+    def test_revision_de_etiqueta_no_afirma_cumplimiento_integral(self):
+        cuerpo = '{"categoria": "inorganico", "nutrientes": {"N": 46}}'
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            r = self._cliente(self.ana).post("/api/v1/catalogo/revisar-etiqueta", cuerpo, content_type="application/json")
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.json()["cumple_contenidos_minimos"])
+        self.assertIn("NO acredita", r.json()["aviso"])
+
+    def test_ruta_pendiente_responde_501_por_django_solo_con_sesion(self):
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            self.assertEqual(self._cliente().get("/api/v1/actividades").status_code, 401)
+            r = self._cliente(self.ana).get("/api/v1/actividades")
+        self.assertEqual(r.status_code, 501)
+        self.assertEqual(r.json()["error"]["codigo"], "NO_IMPLEMENTADO")
+
+    def test_luis_no_ve_datos_de_ana_por_django(self):
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            c = self._cliente(self.luis)
+            self.assertEqual(c.get(f"/api/v1/potreros/{self.pot_ana.pk}").status_code, 404)
+            self.assertEqual([p["nombre"] for p in c.get("/api/v1/predios").json()["predios"]], ["Predio Luis"])
+            self.assertEqual(c.get(f"/api/v1/calculos?potrero_id={self.pot_ana.pk}").json()["calculos"], [])
+
+
+class CatalogoInicialEnApiTests(TestCase):
+    """Los insumos de data/insumos.csv, cargados con cargar_catalogo_inicial, llegan a /api/v1/insumos por Django."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        _flask_o_saltar(cls)
+
+    def setUp(self):
+        call_command("cargar_catalogo_inicial", stdout=StringIO())
+        self.usuario = get_user_model().objects.create_user("eva_api", "eva_api@example.com", "Clave-segura-123")
+        _levantar_flask(self)
+
+    def tearDown(self):
+        _detener_flask(self)
+
+    def test_insumos_del_catalogo_inicial_disponibles_en_la_api(self):
+        c = Client()
+        c.force_login(self.usuario)
+        with override_settings(AGROASESOR_API_URL=self.url, AGROASESOR_INTERNAL_SECRET=SECRETO):
+            r = c.get("/api/v1/insumos")
+            self.assertEqual(r.status_code, 200)
+            insumos = {i["nombre"]: i for i in r.json()["insumos"]}
+            self.assertEqual(
+                set(insumos),
+                {
+                    "Semilla de trigo", "Semilla de arroz", "Papa semilla",
+                    "Urea (referencia de fertilizante)", "Mezcla fertilizante N-P-K (referencia)",
+                },
+            )
+            trigo = insumos["Semilla de trigo"]
+            self.assertEqual(trigo["tipo"], "Semilla")
+            self.assertEqual(trigo["cultivo_id"], Cultivo.objects.get(nombre="Trigo").pk)
+            self.assertIsNone(trigo["dosis_hectarea"])  # sin dosis inventadas
+            self.assertEqual(trigo["verificacion"]["estado"], "unverified")
+            self.assertIsNone(insumos["Urea (referencia de fertilizante)"]["cultivo_id"])
+            # Filtros del catálogo: por tipo y por cultivo.
+            semillas = c.get("/api/v1/insumos?tipo=Semilla").json()["insumos"]
+            self.assertEqual(len(semillas), 3)
+            papa = c.get(f"/api/v1/insumos?cultivo_id={Cultivo.objects.get(nombre='Papa').pk}").json()["insumos"]
+            self.assertEqual([i["nombre"] for i in papa], ["Papa semilla"])
+            detalle = c.get(f"/api/v1/insumos/{trigo['id']}")
+            self.assertEqual(detalle.status_code, 200)
+            self.assertEqual(detalle.json()["nombre"], "Semilla de trigo")
+            # Sin sesión no se listan.
+            self.assertEqual(Client().get("/api/v1/insumos").status_code, 401)

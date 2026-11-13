@@ -1,4 +1,4 @@
-"""Borrador de endpoints de calculos. Sin acceso a datos reales."""
+"""Borrador de endpoints de calculos. Sin acceso a datos reales; exige la autenticación de Django antes de responder 501."""
 
 from flask import Blueprint, g, jsonify, request
 
@@ -20,15 +20,18 @@ def historial():
 
 
 @bp.route("/calculos/semillas", methods=['POST'])
+@requiere_usuario
 def calcular_semillas():
     return pendiente("calculos", request.method + " /calculos/semillas")
 
 
 @bp.route("/calculos/fertilizantes", methods=['POST'])
+@requiere_usuario
 def calcular_fertilizantes():
     return pendiente("calculos", request.method + " /calculos/fertilizantes")
 
 
 @bp.route("/calculos/cobertura", methods=['POST'])
+@requiere_usuario
 def calcular_cobertura():
     return pendiente("calculos", request.method + " /calculos/cobertura")

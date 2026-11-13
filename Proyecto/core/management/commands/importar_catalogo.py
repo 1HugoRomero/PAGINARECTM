@@ -399,6 +399,10 @@ class Command(BaseCommand):
         return instance
 
     def _import(self, data):
+        if data.get('insumos'):
+            # Los insumos necesitan sus categorías base (Semilla, Fertilizante…). Crearlas aquí, dentro de la misma
+            # transacción, hace que importar una carpeta funcione sin un paso previo; no duplica (update_or_create).
+            ensure_insumo_categories()
         for record in data.get('zonas', []):
             if not record.get('nombre'):
                 continue

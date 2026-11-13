@@ -90,12 +90,45 @@ Se definen en `Proyecto/.env` (parte copiando `.env.example`). Ese archivo no se
 | `MAP_TILE_URL`, `MAP_TILE_ATTRIBUTION` | proveedor de mapas (por defecto OpenStreetMap.de) |
 | `EMAIL_*`, `DEFAULT_FROM_EMAIL` | correo para recuperar la contraseña (en local se imprime en la consola) |
 | `AGROASESOR_API_URL`, `AGROASESOR_INTERNAL_SECRET` | conexión con la API Flask; sin ellas `/api/v1/` responde 503 |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | inicio de sesión con Google; sin ellas el botón no aparece |
+| `GOOGLE_REDIRECT_URI` | opcional: URL de retorno exacta registrada en Google |
+| `GOOGLE_MAPS_API_KEY` | clave de Google Maps JavaScript API para el mapa de predios; sin ella se usa el mapa de respaldo |
+
+### Inicio de sesión con Google
+
+Django sigue administrando la autenticación y la sesión; Google solo confirma el correo (OAuth 2.0 +
+OpenID Connect con PKCE, sin dependencias nuevas). Para activarlo:
+
+1. En [Google Cloud Console](https://console.cloud.google.com/) → *APIs y servicios* → *Pantalla de consentimiento
+   de OAuth*: tipo **Externo**, nombre «AgroAsesor», ámbitos `openid`, `email` y `profile`.
+2. *Credenciales* → *Crear credenciales* → **ID de cliente de OAuth** → tipo **Aplicación web**.
+3. En **URI de redireccionamiento autorizados** agrega la dirección exacta de cada entorno, por ejemplo
+   `http://127.0.0.1:8000/cuenta/google/retorno/`, `http://localhost:8000/cuenta/google/retorno/` y,
+   en Codespaces, `https://<tu-codespace>-8000.app.github.dev/cuenta/google/retorno/`.
+4. Copia el ID y el secreto en `Proyecto/.env` (`GOOGLE_CLIENT_ID=...`, `GOOGLE_CLIENT_SECRET=...`) y reinicia Django.
+
+Reglas: si el correo de Google ya tiene cuenta, entra a esa cuenta (no se duplica ni cambia su rol);
+si no, se pide completar el registro de agricultor (nombre, teléfono, comuna, RUT opcional y política).
 
 ## Catálogo agrícola
 
 Zonas, cultivos, problemas, insumos y referencias se cargan desde los CSV de `data/` o desde `/admin/`.
 Ningún dato técnico se inventa: completa cada fila solo con valores de una fuente oficial
 (SAG, ODEPA, INIA o la etiqueta del fabricante).
+
+**Carga inicial controlada (recomendada).** Al arrancar el contenedor se ejecuta
+`cargar_catalogo_inicial`, que importa `data/*.csv` (cultivos, zona Melipilla e insumos de referencia
+con sus categorías) **solo si los CSV cambiaron** desde la última carga registrada (tabla `CargaCatalogo`,
+visible en `/admin/`). Un reinicio normal no importa nada. Nunca duplica, sobrescribe ni borra registros:
+lo que ya existe (por ejemplo, un insumo corregido en `/admin/`) se deja tal cual.
+
+```powershell
+python manage.py cargar_catalogo_inicial            # carga data/ si es nueva o cambió
+python manage.py cargar_catalogo_inicial --simular  # muestra qué haría, sin guardar
+python manage.py cargar_catalogo_inicial --forzar   # revisa de nuevo los CSV (solo agrega lo que falte)
+```
+
+Importación manual (para otros archivos o para corregir registros existentes):
 
 ```powershell
 python manage.py importar_catalogo --categorias                   # categorías de insumo (una vez)

@@ -1,0 +1,49 @@
+# Pruebas automáticas de AgroAsesor: API Flask (pytest) y Django (incluida la integración Django → Flask).
+name: Pruebas
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-flask:
+    name: API Flask (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Proyecto/backend_flask
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-dev.txt
+      - name: pytest
+        run: python -m pytest -q
+      - name: Integridad del catálogo
+        run: python scripts/verificar_integridad_catalogo.py
+
+  django:
+    name: Django (integración con la API)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Proyecto
+    env:
+      DATABASE_URL: sqlite:////tmp/agroasesor-ci.sqlite3
+      DJANGO_SECRET_KEY: clave-solo-para-pruebas-de-ci
+      DJANGO_DEBUG: 'True'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt -r backend_flask/requirements.txt
+      - name: Integración Django → Flask
+        run: python manage.py test core.tests.test_api -v 2
+      - name: Suite completa de Django
+        run: python manage.py test core

@@ -1,4 +1,4 @@
-# AgroAsesor: catálogo con fuentes institucionales, revisado 2026-10-28.
+# AgroAsesor: catálogo con fuentes institucionales, revisado 2026-10-28; etiquetas SAG recotejadas 2026-11-11.
 # Sin marcas, presentaciones ni precios inventados.
 version: 0.2.0
 fecha_consulta: '2026-10-28'
@@ -39,31 +39,35 @@ fuentes:
   titulo: Etiqueta y HDS FUNGISEI
   url: https://www.sag.gob.cl/sites/default/files/FUNGISEI%20ET%20y%20HDS%2019-12-2025.pdf
   actualizacion_publicada: '2025-12-19'
+  fecha_consulta: '2026-11-11'
   tipo: etiqueta_producto
 - id: sag_abamectin
   organismo: SAG
   titulo: Etiqueta y HDS ABAMECTIN 84 SC
-  url: https://www.sag.gob.cl/sites/default/files/ABAMECTIN%2084%20SC%20Etiqueta%20y%20HDS%2004-10-2026.pdf
-  actualizacion_publicada: '2026-10-04'
+  url: https://www.sag.cl/sites/default/files/ABAMECTINA%2084%20SC%20ETI-HDS%2027-01-2026.pdf
+  actualizacion_publicada: '2026-01-27'
+  fecha_consulta: '2026-11-11'
   tipo: etiqueta_producto
 - id: sag_bird_shield
   organismo: SAG
-  titulo: Ficha de etiqueta BIRD SHIELD
-  url: https://www.sag.gob.cl/content/bird-shield
-  actualizacion_publicada: '2025-12-02'
+  titulo: Etiqueta y HDS BIRD SHIELD
+  url: https://sag.cl/sites/default/files/BIRD%20SHIELD%20V009%20OS2%20%28WEB%20SAG%29%2022.10.25%20%2B%20HDS.pdf
+  actualizacion_publicada: '2025-10-22'
+  fecha_consulta: '2026-11-11'
   tipo: etiqueta_producto
 - id: sag_captiva_prime
   organismo: SAG
-  titulo: Ficha de etiqueta CAPTIVA PRIME
-  url: https://www.sag.gob.cl/content/captiva-prime
-  actualizacion_publicada: '2025-12-03'
+  titulo: Etiqueta y HDS CAPTIVA PRIME
+  url: https://sag.cl/sites/default/files/Etiqueta%20mas%20HDS%20Captiva%20Prime%20Nov25.pdf
+  actualizacion_publicada: '2025-11'
+  fecha_consulta: '2026-11-11'
   tipo: etiqueta_producto
 - id: sag_avadex
   organismo: SAG
-  titulo: Ficha de etiqueta AVADEX 480 EC
-  url: https://www.sag.gob.cl/content/avadex-480-ec
+  titulo: Etiqueta y HDS AVADEX 480 EC
+  url: https://www.sag.cl/sites/default/files/Etiqueta-mas-HDS-Avadex-480-EC.pdf
+  fecha_consulta: '2026-11-11'
   tipo: etiqueta_producto
-  actualizacion_publicada: '2026-08-10'
 - id: inia_semillas
   organismo: INIA
   titulo: Semillas certificadas INIA
@@ -247,7 +251,9 @@ productos:
   presentaciones_comerciales_verificadas: []
   precio_clp: null
   registro_indicado_en_etiqueta: '20045'
+  ingrediente_activo_en_etiqueta: Bacillus subtilis cepa IAB/BS03
   fabricante: SEIPASA S.A.
+  cotejado_con_etiqueta: '2026-11-11'
   advertencias:
   - Seguir estrictamente la etiqueta y HDS
   - No calcular aplicaciones sin validar cultivo, enfermedad y vigencia del registro.
@@ -264,7 +270,9 @@ productos:
   presentaciones_comerciales_verificadas: []
   precio_clp: null
   registro_indicado_en_etiqueta: '1955'
+  ingrediente_activo_en_etiqueta: Abamectina 84 g/L (8,4 % p/v)
   fabricante: AGROSPEC S.A.
+  cotejado_con_etiqueta: '2026-11-11'
   advertencias:
   - MUY TÓXICO PARA ABEJAS según etiqueta
   - Requiere comprobación de cultivo, plaga, etiqueta y registro vigente
@@ -285,6 +293,10 @@ productos:
   - Verificar estado vigente en registro SAG antes de uso
   - Leer etiqueta para cultivo, carencia y seguridad.
   empresa_publicada_por_sag: UPL CHILE S.A. (empresa indicada por SAG)
+  registro_indicado_en_etiqueta: '1880'
+  ingrediente_activo_en_etiqueta: Antranilato de metilo 26,41 %
+  fabricante: Bird Shield Repellent Corporation
+  cotejado_con_etiqueta: '2026-11-11'
 - id: captiva-prime
   nombre: CAPTIVA PRIME
   categoria: repelentes
@@ -300,11 +312,15 @@ productos:
   advertencias:
   - Verificar estado vigente y usos autorizados en etiqueta.
   empresa_publicada_por_sag: GOWAN CHILE SPA (empresa indicada por SAG)
+  registro_indicado_en_etiqueta: '1952'
+  ingrediente_activo_en_etiqueta: Aceite de ajo 23,4 % p/p y oleorresina de capsicum 7,6 % p/p
+  fabricante: Ecoflora AgroFormulaciones S.A.S. (formulador)
+  cotejado_con_etiqueta: '2026-11-11'
 - id: avadex-480-ec
   nombre: AVADEX 480 EC
   categoria: herbicidas
   clase: producto_con_etiqueta_sag
-  descripcion: Producto incluido en publicaciones de etiquetas SAG. No se infieren cultivos ni dosis.
+  descripcion: Herbicida según su etiqueta publicada por SAG. No se infieren cultivos ni dosis.
   fuente_ids:
   - sag_avadex
   - sag_plaguicidas
@@ -315,6 +331,10 @@ productos:
   advertencias:
   - Verificar etiqueta individual y estado vigente en registro SAG.
   empresa_publicada_por_sag: GOWAN CHILE SpA (empresa indicada por SAG)
+  registro_indicado_en_etiqueta: '3715'
+  ingrediente_activo_en_etiqueta: Trialato 480 g/L (46,6 % p/p)
+  fabricante: GOWAN COMPANY LLC
+  cotejado_con_etiqueta: '2026-11-11'
 referencias_siembra:
 - id: trigo-invierno
   cultivo: Trigo

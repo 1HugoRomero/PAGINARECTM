@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import (
+    CargaCatalogo,
     AceptacionPoliticas,
     ActividadAgricola,
     CalculoAgricola,
@@ -367,3 +368,24 @@ class UsoInsumoCultivoAdmin(admin.ModelAdmin):
     @admin.action(description='Marcar como no vigente (conserva el historial)')
     def marcar_no_vigente(self, request, queryset):
         queryset.update(activo=False)
+
+
+@admin.register(CargaCatalogo)
+class CargaCatalogoAdmin(admin.ModelAdmin):
+    """Historial de cargas del catálogo inicial: solo lectura (lo escribe cargar_catalogo_inicial)."""
+
+    list_display = ('aplicada', 'carpeta', 'huella_corta', 'forzada')
+    readonly_fields = ('aplicada', 'carpeta', 'huella', 'archivos', 'resumen', 'forzada')
+
+    @admin.display(description='huella')
+    def huella_corta(self, obj):
+        return obj.huella[:12]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
